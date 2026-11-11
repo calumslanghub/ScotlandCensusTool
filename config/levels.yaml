@@ -1,0 +1,225 @@
+# Geography levels for the Census Explorer build.
+#
+# Paths are relative to the project root. Every source must be in `source_crs`, unless the
+# level sets its own `crs`: that file is checked against it and reprojected to `source_crs`
+# on read (community councils come as EPSG:4326 GeoJSON). `code_prefix` is prepended to codes.
+#
+# `fields` maps each common-schema column to a source column (or null):
+#   code, name          required; name may reuse the code column when no name exists
+#   pop, households     null -> left empty (filled later by aggregation, if at all)
+#   parent_code         a source column holding the LA code, or null when the parent
+#                       is assigned later by spatial join (see `parent_join`)
+#   area_km2            a source column; multiplied by `area_scale` (default 1.0).
+#                       null -> computed from geometry in source_crs
+#
+# `parent_join` marks levels with no parent column; build/assign.py assigns their LA.
+#   representative_point  the feature's representative point (guaranteed inside the
+#                         feature, unlike the centroid) is joined to LA polygons
+#
+# `derived` levels have no boundary file: their features are the `from` level dissolved by
+# `group_field` (a field added during assignment), named from a JoinGuide lookup CSV.
+# Their parent LA is the LA holding the most of their member features.
+
+source_crs: "EPSG:27700"
+output_crs: "EPSG:4326"
+
+# Parent / locality assignment (build/assign.py).
+assign:
+  la_level: la                # level whose codes form the LA table
+  la_geometry: dissolve_oa    # dissolve_oa | file
+  dissolve_level: oa          # level dissolved by parent_code when la_geometry = dissolve_oa
+  locality_level: locality
+  locality_field: locality_code
+  locality_targets: [oa, postcode]   # levels that get a locality_code
+  # Attributes joined to a level by code from a JoinGuide lookup (the hierarchy source of
+  # truth). `fields` maps output field -> lookup column.
+  lookup_fields:
+    - level: oa
+      path: data/JoinGuide/OA_TO_HIGHER_AREAS.csv
+      key: OA2022
+      fields: {ward_code: EW2022}
+  # Attributes copied from the `from` feature containing each feature's representative
+  # point. `link_field` stores that feature's code. Postcode -> OA is a spatial join;
+  # `check` is an optional lookup CSV the build compares against (QA only, logged).
+  point_fields:
+    - level: postcode
+      from: oa
+      link_field: oa_code
+      fields: [ward_code]
+      check: {path: data/JoinGuide/Postcode_To_OA.csv, key: Postcode, value: OutputArea2022Code}
+    # DZ2022 of each OA = the data zone holding its representative point (the lookup's DZ2011
+    # does not match the 2022 boundaries).
+    - level: oa
+      from: dz
+      link_field: dz_code
+      fields: []
+  # Largest-overlap links, for boundaries with no lookup that do not nest in the Census
+  # geography: each OA gets the community council covering most of its area (in source_crs).
+  # `parents`: only OAs in these council areas (Dumfries and Galloway; others stay null).
+  # `counts`: summed from the linked OAs onto each community council.
+  area_fields:
+    - level: oa
+      from: cc
+      link_field: cc_code
+      parents: [S12000006]
+      counts: [pop, households]
+  # Neighbour lists: each feature of `level` gets `field`, the sorted codes of the features
+  # that touch it (share an edge or a corner). Read by explorer map-mode steps with
+  # `neighbours: true` (the output areas of the wards around the open ward).
+  neighbours:
+    - {level: ew, field: neighbour_codes}
+
+# Census tables (build/census.py). Counts are read at `oa_level` only and summed up to each
+# level by that level's grouping field on the OA features; `national` sums every OA. An OA
+# with a null grouping value (e.g. no locality) counts towards the other levels, not that one.
+census:
+  datasets_dir: config/datasets
+  oa_level: oa
+  groups:
+    la: parent_code
+    ew: ward_code
+    locality: locality_code
+    dz: dz_code
+    cc: cc_code
+
+# Simplification (build/simplify.py). Each level's tolerance is `simplify_m` (metres).
+#   mapshaper: topology-preserving simplification via `npx <package>`; shared edges stay
+#              shared. If npx is not on PATH the build warns and uses the shapely engine.
+#   shapely:   shapely.coverage_simplify in source_crs. Also preserves shared edges, but
+#              only where the input is a clean coverage (no overlaps).
+simplify:
+  engine: mapshaper           # mapshaper | shapely
+  mapshaper_package: mapshaper@0.6
+  mapshaper_bin: mapshaper-xl # -xl raises Node's heap limit for the postcode layer
+
+# Output files (build/export.py), paths relative to the project root.
+# Paths below are logical names; with `gzip: true` each file is written as <path>.gz
+# (gzip bytes, deterministic) and nothing else. `python -m http.server` does not
+# compress, so the front end decompresses (web/js/fetch-data.js).
+# JSON is minified. max_file_mb applies to the bytes on disk (i.e. compressed size).
+export:
+  out_dir: data/processed
+  publish_dir: web/data       # out_dir is copied here so `python -m http.server` in web/ serves it
+  manifest_file: manifest.json   # never gzipped: the front end's entry point
+  metrics_file: metrics.json     # written from config/metrics.yaml
+  explorer_file: explorer.json   # validated config/explorer.yaml (tabs, indicators, panels)
+  gzip: true
+  gzip_level: 9
+  coordinate_precision: 5
+  max_file_mb: 5
+  la_file: la.geojson
+  per_la_levels: [ew, locality, oa, postcode]
+  per_la_path: "{level}/{la_code}.geojson"
+  # Levels also written as one national file (e.g. the Data zones map mode).
+  national_levels: [dz, cc]
+  national_path: "{level}.geojson"
+  # Search index, columnar: {"fields": [...], "rows": [[...], ...]}.
+  # Small levels go in one file; large levels are split per LA and loaded lazily.
+  index_fields: [code, name, level, parent_code, pop, bbox]
+  index_file: index.json
+  index_levels: [la, ew, locality, dz, cc]
+  per_la_index_path: "index/{la_code}.json"
+  per_la_index_levels: [oa, postcode]
+  # Census table values (config/datasets), columnar {codes, <metric id>: [...]}, one file per
+  # dataset so the front end downloads only the tables an indicator or query uses:
+  #   dataset_values_path  per level the tables are summed to (census.groups)
+  #   oa_values_path       per council area, for its output areas (loaded with the OA layer)
+  # metrics.json keeps every metric's definition and Scotland value, and the values of the
+  # metrics that come from no dataset (population, density).
+  dataset_values_path: "values/{level}/{dataset}.json"
+  oa_values_path: "values/oa/{la_code}/{dataset}.json"
+
+levels:
+  la:
+    simplify_m: 100
+    label: Council area
+    path: data/raw/Shape/ScotlandLABoundaries/pub_las.shp
+    fields:
+      code: code
+      name: local_auth
+      pop: null
+      households: null
+      parent_code: null
+      area_km2: hectares
+    area_scale: 0.01
+
+  ew:
+    simplify_m: 20
+    label: Electoral ward
+    derived:
+      from: oa
+      group_field: ward_code
+      names:
+        path: data/JoinGuide/Higher_Geographies_LookUps/Electoral Ward 2022 Lookup.csv
+        code: ElectoralWard2022Code
+        name: ElectoralWard2022Name
+
+  dz:
+    simplify_m: 20
+    label: Data zone
+    path: data/raw/Shape/Census2022_DZ_Boundary/SG_DataZone_Bdry_2022.shp
+    fields:
+      code: dzcode
+      name: dzname
+      pop: totpop2022
+      households: hhcnt2022
+      parent_code: null
+      area_km2: stdareakm2
+    parent_join: representative_point
+
+  oa:
+    simplify_m: 10
+    label: Output area
+    path: data/raw/Shape/CensusOutputArea2022_MHW/OutputArea2022_MHW.shp
+    fields:
+      code: code
+      name: code
+      pop: Popcount
+      households: HHcount
+      parent_code: council
+      area_km2: sqkm
+
+  postcode:
+    simplify_m: 5
+    label: Postcode
+    path: data/raw/Shape/Census2022_PostcodeMHW/Postcode2022_MHW/Postcode2022_MHW.shp
+    fields:
+      code: postcode
+      name: postcode
+      pop: Popcount
+      households: HHcount
+      parent_code: council
+      area_km2: Shape_Area
+    area_scale: 1.0e-6
+
+  # Dumfries and Galloway community councils (Dumfries and Galloway Council, no Census
+  # lookup). Population and households are the sums of their OAs (assign.area_fields).
+  cc:
+    simplify_m: 20
+    label: Community council
+    path: data/raw/Shape/CommunityCouncils/DumfriesGallowayCommunityCouncils.geojson
+    crs: "EPSG:4326"
+    code_prefix: DGCC
+    fields:
+      code: id
+      name: community_
+      pop: null
+      households: null
+      parent_code: null
+      area_km2: null
+    parent_join: representative_point
+
+  locality:
+    simplify_m: 20
+    label: Locality
+    label_plural: Localities   # default: label + "s"
+    path: data/raw/Shape/CensusLocality2022_MHW/CensusLocality2022_MHW.shp
+    fields:
+      code: code
+      name: name
+      pop: Popcount
+      households: null
+      parent_code: null
+      area_km2: Shape_Area
+    area_scale: 1.0e-6
+    parent_join: representative_point

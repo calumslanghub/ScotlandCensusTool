@@ -1,0 +1,70 @@
+# config/datasets/<id>.yaml: one file per Census table. Adding a table is a YAML change only.
+# If a table seems to need new code, stop: either one of the closed `kind`s below fits, or the
+# new kind is added once to build/measures.py with a test, then used from YAML.
+#
+# How the build uses this file
+#   1. Reads the OA-level CSV (source.file). OA is the only input level: every other level is
+#      built by SUMMING OA counts, then computing measures. Percentages are never averaged.
+#        council area  <- OA_TO_HIGHER_AREAS CA2019        locality <- CLOC2022
+#        data zone     <- OA representative point in DZ polygon     national <- all OAs
+#      OAs with no locality count towards their council area but towards no locality.
+#   2. Checks the CSV: every OA code is known, no duplicate OA codes, every category column
+#      exists, total_column >= sum of categories (or equals it), no negative counts.
+#   3. Writes per-level values for each measure into metrics.json. The browser does no maths
+#      other than the baseline difference.
+# Published higher-geography Census tables may differ slightly from sums of OAs (disclosure
+# control). The build prints the largest differences when you give it a check file.
+
+id: uv000_example               # unique, snake_case, same as the file name
+status: draft                   # draft | ready. draft: validated, hidden from the UI, warning printed
+table: UV000                    # the Census table code, shown in the source note
+title: Example table
+source:
+  file: data/census/UV000-oa.csv
+  geography: oa                 # only `oa` is supported
+  code_column: "Output Area"    # exact CSV header of the OA code column
+  skip_rows: 0                  # rows to skip before the header row
+  encoding: utf-8-sig
+  citation: "Scotland's Census 2022, UV000, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+
+universe:
+  label: "People aged 16 and over in employment"
+  total_column: "All people"    # denominator for shares. Use `total: sum_of_categories` instead
+                                # when the file has no total column.
+
+# Count columns the UI can offer. `column` is the exact CSV header.
+# `value` is only needed for banded categories used by mean_from_bands.
+categories:
+  - { id: cat_a, column: "Category A", label: "Category A" }
+  - { id: cat_b, column: "Category B", label: "Category B" }
+
+# Closed list of measure kinds (build/measures.py). Do not add dataset-specific kinds.
+#   count            category count (people)
+#   share            category / total * 100                      needs selector: category
+#   share_of         sum(of) / total * 100                       a fixed group, e.g. long commutes
+#   mean_from_bands  sum(value * count) / sum(count) over include a weighted mean of band values
+# Common options
+#   selector: category   the UI shows a dropdown over `categories` (one measure, many maps)
+#   min_denominator: n   below n people in the denominator, an area is grey ("too few people")
+#   decimals, unit, label
+measures:
+  - id: share
+    kind: share
+    selector: category
+    label: "% of people"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20
+  - id: long_group
+    kind: share_of
+    of: [cat_b]
+    label: "% in category B"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20
+
+# Optional. Aggregate-level check file to compare build sums against, e.g. the published
+# council-area CSV for the same table. Differences are reported, never "fixed".
+check:
+  file: null
+  geography: council_area

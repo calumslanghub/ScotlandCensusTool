@@ -1,0 +1,37 @@
+# UV101b: usual residents by residence type (household or communal establishment), by sex and
+# by age, in one table with three header rows. The age and sex columns are `splits` of each
+# residence type read from the table itself (no prefix); the sex x age cells are not read.
+id: uv101b_residence_type
+status: ready
+table: UV101b
+title: Residence type by sex and age
+scheme: PuBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV101b - Usual resident population by sex by age (6).csv"
+  citation: "Scotland's Census 2022, UV101b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people - Total"}
+categories:
+  - {id: household, column: "Lives in a household - Total", label: Lives in a household, short: Household}
+  - {id: communal, column: "Lives in a communal establishment - Total", label: Lives in a communal establishment, short: Communal}
+splits:
+  - group: age
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      household: "Lives in a household"
+      communal: "Lives in a communal establishment"
+  - group: sex
+    column: "{header} - {band} - Total"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents:
+      household: "Lives in a household"
+      communal: "Lives in a communal establishment"
+note: "Communal establishments include care homes, student halls, hospitals, prisons and armed forces bases."

@@ -1,0 +1,26 @@
+# UV407: type of central heating. "Gas central heating: Total" is a subtotal of mains gas and
+# other gas.
+id: uv407_central_heating
+status: ready
+table: UV407
+title: Central heating
+scheme: YlOrRd
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV407 - Central heating.csv"
+  citation: "Scotland's Census 2022, UV407, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: none, column: "No central heating", label: No central heating, short: None}
+  - {id: gas, column: "Gas central heating: Total", subtotal: true, label: Gas central heating, short: Gas}
+  - {id: mains_gas, column: "Gas central heating: Mains gas", parent: gas, label: Mains gas, short: Mains gas}
+  - {id: other_gas, column: "Gas central heating: Other gas (including liquid petroleum gas and biogas)", parent: gas, label: "Other gas (including LPG and biogas)", short: Other gas}
+  - {id: electric, column: "Electric (including storage heaters) central heating", label: Electric (including storage heaters), short: Electric}
+  - {id: oil, column: "Oil central heating", label: Oil, short: Oil}
+  - {id: solid_fuel, column: "Solid Fuel (excluding wood)", label: Solid fuel (excluding wood), short: Solid fuel}
+  - {id: wood, column: "Wood or Biomass (including logs, pellets, chippings) central heating", label: Wood or biomass, short: Wood/biomass}
+  - {id: renewable, column: "Other renewable energy source (including electric and air heat pump systems)", label: Other renewable source (including heat pumps), short: Renewable}
+  - {id: district, column: "District or communal heat system", label: District or communal heat system, short: District}
+  - {id: other, column: "Other central heating", label: Other central heating, short: Other}
+  - {id: two_or_more, column: "Two or more types of central heating", label: Two or more types of central heating, short: 2+ types}
+  - {id: not_mains_gas, rest_of: [mains_gas], label: Not heated by mains gas alone, short: Not mains gas}
+note: "Households with two or more types of central heating are counted once, under 'two or more types', whatever the types are."

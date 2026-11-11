@@ -1,0 +1,19 @@
+# UV304: a person can have several conditions, so shares are of all people and overlap.
+id: uv304_health_conditions
+status: ready
+table: UV304
+title: Long-term health conditions
+scheme: Purples
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV304 - Long-term health conditions.csv
+  citation: "Scotland's Census 2022, UV304, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people", denominator: total_column}
+categories:
+  - {id: hearing, column: "Deaf or partially hearing impaired", label: Deaf or partially hearing impaired, short: Hearing}
+  - {id: vision, column: "Blind or partially vision impaired", label: Blind or partially vision impaired, short: Vision}
+  - {id: speech, column: "Full/partial loss of voice or difficulty speaking", label: Loss of voice or difficulty speaking, short: Speech}
+  - {id: learning, column: "Has one or more of learning disability, learning difficulty or developmental disorder", label: "Learning disability, difficulty or developmental disorder", short: Learning}
+  - {id: physical, column: "Physical disability", label: Physical disability, short: Physical}
+  - {id: mental_health, column: "Mental health condition", label: Mental health condition, short: Mental health}
+  - {id: long_term_illness, column: "Long-term illness, disease or condition", label: "Long-term illness, disease or condition", short: Long-term illness}
+note: "People can report more than one condition, so the shares overlap and do not add up to 100."

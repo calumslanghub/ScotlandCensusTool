@@ -1,0 +1,37 @@
+# UV607: National Statistics Socio-economic Classification (NS-SeC), published as its 16
+# operational categories (L1 ... L15). The shown rows are the standard analytic classes they
+# collapse to (1: L1-L3, 2: L4-L6, 3: L7, 4: L8-L9, 5: L10-L11, 6: L12, 7: L13, 8: L14, and
+# L15 full-time students); the operational categories are their sub-types.
+id: uv607_ns_sec
+status: ready
+table: UV607
+title: Socio-economic classification (NS-SeC)
+scheme: BuPu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV607 - National Statistics Socio-economic Classification (NS-SeC).csv"
+  citation: "Scotland's Census 2022, UV607, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over", total_column: "All people aged 16 and over"}
+categories:
+  - {id: l1, column: "L1: Employers in large establishments", parent: higher, label: "L1: Employers in large establishments", short: L1 Large employers}
+  - {id: l2, column: "L2: Higher managerial and administrative occupations", parent: higher, label: "L2: Higher managerial and administrative occupations", short: L2 Higher managerial}
+  - {id: l3, column: "L3: Higher professional occupations", parent: higher, label: "L3: Higher professional occupations", short: L3 Higher professional}
+  - {id: l4, column: "L4: Lower professional and higher technical occupations", parent: lower_managerial, label: "L4: Lower professional and higher technical occupations", short: L4 Lower professional}
+  - {id: l5, column: "L5: Lower managerial and administrative occupations", parent: lower_managerial, label: "L5: Lower managerial and administrative occupations", short: L5 Lower managerial}
+  - {id: l6, column: "L6: Higher supervisory occupations", parent: lower_managerial, label: "L6: Higher supervisory occupations", short: L6 Higher supervisory}
+  - {id: intermediate, column: "L7: Intermediate occupations", label: "3. Intermediate occupations", short: Intermediate}
+  - {id: l8, column: "L8: Employers in small establishments", parent: small_employers, label: "L8: Employers in small establishments", short: L8 Small employers}
+  - {id: l9, column: "L9: Own account workers", parent: small_employers, label: "L9: Own account workers", short: L9 Own account}
+  - {id: l10, column: "L10: Lower supervisory occupations", parent: lower_supervisory, label: "L10: Lower supervisory occupations", short: L10 Lower supervisory}
+  - {id: l11, column: "L11: Lower technical occupations", parent: lower_supervisory, label: "L11: Lower technical occupations", short: L11 Lower technical}
+  - {id: semi_routine, column: "L12: Semi-routine occupations", label: "6. Semi-routine occupations", short: Semi-routine}
+  - {id: routine, column: "L13: Routine occupations", label: "7. Routine occupations", short: Routine}
+  - {id: l14_1, column: "L14.1: Never worked", parent: never_worked, label: "L14.1: Never worked", short: Never worked}
+  - {id: l14_2, column: "L14.2: Long-term unemployed", parent: never_worked, label: "L14.2: Long-term unemployed", short: Long-term unemployed}
+  - {id: students, column: "L15: Full-time students", label: Full-time students, short: Students}
+  # --- analytic classes ---
+  - {id: higher, of: [l1, l2, l3], label: "1. Higher managerial, administrative and professional occupations", short: Higher managerial}
+  - {id: lower_managerial, of: [l4, l5, l6], label: "2. Lower managerial, administrative and professional occupations", short: Lower managerial}
+  - {id: small_employers, of: [l8, l9], label: "4. Small employers and own account workers", short: Small employers}
+  - {id: lower_supervisory, of: [l10, l11], label: "5. Lower supervisory and technical occupations", short: Lower supervisory}
+  - {id: never_worked, of: [l14_1, l14_2], label: "8. Never worked and long-term unemployed", short: Never worked}
+note: "NS-SeC classifies people by occupation and employment status. Classes 1 to 8 are the standard analytic classes; full-time students are shown separately."

@@ -1,0 +1,19 @@
+# UV803: length of residence in the UK, for people born outside it.
+id: uv803_length_of_residence
+status: ready
+table: UV803
+title: Length of residence in the UK
+scheme: GnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV803 - Length of residence in the UK.csv"
+  citation: "Scotland's Census 2022, UV803, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: born_uk, column: "Born in the UK", label: Born in the UK, short: Born in UK}
+  - {id: lt2, column: "Less than 2 years", label: Resident less than 2 years, short: "<2 years"}
+  - {id: y2_5, column: "2 years or more and less than 5 years", label: Resident 2 to under 5 years, short: 2–5 years}
+  - {id: y5_10, column: "5 years or more and less than 10 years", label: Resident 5 to under 10 years, short: 5–10 years}
+  - {id: y10p, column: "10 years or more", label: Resident 10 years or more, short: 10+ years}
+  - {id: born_outside, rest_of: [born_uk], label: Born outside the UK, short: Born outside UK}
+  - {id: under_5_years, of: [lt2, y2_5], label: Resident less than 5 years, short: "<5 years"}
+note: "Length of residence in the UK, for people born outside the UK. Shares are of all people."

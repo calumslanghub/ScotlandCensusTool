@@ -1,0 +1,87 @@
+# Metrics for the front end (build/metrics.py -> <export.out_dir>/<file>).
+#
+# Two sources:
+#   census     (default) value = numerator / denominator * scale, from boundary-file
+#              attributes (pop, households, area_km2). Real Census 2022 figures.
+#   synthetic  ILLUSTRATIVE values invented by build/synthetic.py so the explorer layout
+#              can be built before the Census tables are wired in. Stable (seeded), with an
+#              urban/rural effect from population density plus noise. The front end badges
+#              every synthetic metric "Illustrative data". Never present them as Census figures.
+#
+# A census metric is published for a level only if its source columns have data there;
+# levels without it show grey "no data at this level" in the app. Synthetic metrics are
+# published for every level in `levels`.
+# national: census -> sum(numerator) / sum(denominator) * scale over `national_level`;
+#           synthetic -> `synthetic.weight`-weighted mean of the national_level values.
+# scheme: a d3-scale-chromatic sequential scheme name (Blues, Greens, Purples, ...).
+# short: optional short label for chart axes (profile / composition series).
+#
+# Synthetic parameters, per metric: value = base + urban * u + spread * noise, where u is
+# an urban index from log10(density) (about -1 rural to +1.3 city). Lower levels (localities)
+# start from their council area's value. `share_group`: metrics in one group are shares of
+# one total; the build rescales them so each area's group sums to exactly 100.
+
+file: metrics.json
+levels: [la, ew, locality, dz, cc]
+national_level: la
+classes: 5
+default_metric: pop
+default_classification: quantile    # quantile | jenks
+
+synthetic:
+  seed: 2022
+  density: {numerator: pop, denominator: area_km2}   # drives the urban/rural effect
+  weight: pop                                        # national = weighted mean of LA values
+  note: "Invented values that show the layout. These are not Census 2022 figures."
+
+metrics:
+  # ---- census (real) ----
+  - id: pop
+    label: Population
+    unit: people
+    numerator: pop
+    decimals: 0
+    scheme: Blues
+
+  - id: households
+    label: Households
+    unit: households
+    numerator: households
+    decimals: 0
+    scheme: Greens
+
+  - id: area_km2
+    label: Area
+    unit: km²
+    numerator: area_km2
+    decimals: 1
+    scheme: Greens
+
+  - id: density
+    label: Population density
+    unit: people per km²
+    numerator: pop
+    denominator: area_km2
+    decimals: 1
+    scheme: Purples
+
+  - id: people_per_household
+    label: People per household
+    unit: people (incl. communal) per household
+    numerator: pop
+    denominator: households
+    decimals: 2
+    scheme: Oranges
+
+  # ---- synthetic (illustrative) ----
+  - {id: tw_car, label: Car or van, short: Car/van, unit: "%", decimals: 1, scheme: Greens, source: synthetic, share_group: travel_to_work,
+     synthetic: {base: 56, urban: -15, spread: 4}}
+  - {id: tw_pt, label: Public transport, short: Public, unit: "%", decimals: 1, scheme: Greens, source: synthetic, share_group: travel_to_work,
+     synthetic: {base: 10, urban: 7, spread: 2}}
+  - {id: tw_walk, label: On foot, short: Walk, unit: "%", decimals: 1, scheme: Greens, source: synthetic, share_group: travel_to_work,
+     synthetic: {base: 11, urban: 4, spread: 2.5}}
+  - {id: tw_cycle, label: Cycle, short: Cycle, unit: "%", decimals: 1, scheme: Greens, source: synthetic, share_group: travel_to_work,
+     synthetic: {base: 2, urban: 1.8, spread: 0.7}}
+  - {id: tw_home, label: Work mainly from home, short: Home, unit: "%", decimals: 1, scheme: Greens, source: synthetic, share_group: travel_to_work,
+     synthetic: {base: 21, urban: 2, spread: 3}}
+

@@ -1,0 +1,105 @@
+{
+ "gzip": true,
+ "la_level": "la",
+ "locality_level": "locality",
+ "la_file": "la.geojson.gz",
+ "per_la": {
+  "ew": "ew/{la_code}.geojson.gz",
+  "locality": "locality/{la_code}.geojson.gz",
+  "oa": "oa/{la_code}.geojson.gz",
+  "postcode": "postcode/{la_code}.geojson.gz"
+ },
+ "national": {
+  "dz": "dz.geojson.gz",
+  "cc": "cc.geojson.gz"
+ },
+ "index_file": "index.json.gz",
+ "per_la_index": "index/{la_code}.json.gz",
+ "dataset_values": "values/{level}/{dataset}.json.gz",
+ "oa_values": "values/oa/{la_code}/{dataset}.json.gz",
+ "oa_level": "oa",
+ "oa_groups": {
+  "la": "parent_code",
+  "ew": "ward_code",
+  "locality": "locality_code",
+  "dz": "dz_code",
+  "cc": "cc_code"
+ },
+ "neighbours": {
+  "ew": "neighbour_codes"
+ },
+ "index_fields": [
+  "code",
+  "name",
+  "level",
+  "parent_code",
+  "pop",
+  "bbox"
+ ],
+ "metrics_file": "metrics.json.gz",
+ "explorer_file": "explorer.json.gz",
+ "levels": {
+  "la": {
+   "label": "Council area",
+   "plural": "Council areas"
+  },
+  "ew": {
+   "label": "Electoral ward",
+   "plural": "Electoral wards"
+  },
+  "dz": {
+   "label": "Data zone",
+   "plural": "Data zones"
+  },
+  "oa": {
+   "label": "Output area",
+   "plural": "Output areas"
+  },
+  "postcode": {
+   "label": "Postcode",
+   "plural": "Postcodes"
+  },
+  "cc": {
+   "label": "Community council",
+   "plural": "Community councils"
+  },
+  "locality": {
+   "label": "Locality",
+   "plural": "Localities"
+  }
+ },
+ "la_codes": [
+  "S12000005",
+  "S12000006",
+  "S12000008",
+  "S12000010",
+  "S12000011",
+  "S12000013",
+  "S12000014",
+  "S12000017",
+  "S12000018",
+  "S12000019",
+  "S12000020",
+  "S12000021",
+  "S12000023",
+  "S12000026",
+  "S12000027",
+  "S12000028",
+  "S12000029",
+  "S12000030",
+  "S12000033",
+  "S12000034",
+  "S12000035",
+  "S12000036",
+  "S12000038",
+  "S12000039",
+  "S12000040",
+  "S12000041",
+  "S12000042",
+  "S12000045",
+  "S12000047",
+  "S12000048",
+  "S12000049",
+  "S12000050"
+ ]
+}

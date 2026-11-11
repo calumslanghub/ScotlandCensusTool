@@ -1,0 +1,14 @@
+# UV902: households with at least one UK Armed Forces veteran. The table's total column is
+# headed "Total" (the title line says "All households").
+id: uv902_veteran_households
+status: ready
+table: UV902
+title: UK Armed Forces veterans (households)
+scheme: Reds
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV902 - UK Armed Forces veterans - Households.csv"
+  citation: "Scotland's Census 2022, UV902, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All households", total_column: "Total", unit: households}
+categories:
+  - {id: veteran_household, column: "Household contains at least one UK Armed Forces veteran", label: Household with at least one UK Armed Forces veteran, short: With a veteran}
+  - {id: no_veterans, column: "Household contains no UK Armed Forces veterans", label: Household with no UK Armed Forces veterans, short: No veterans}

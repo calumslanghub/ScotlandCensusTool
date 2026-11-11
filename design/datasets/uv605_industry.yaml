@@ -1,0 +1,33 @@
+# UV605: industry of employment. People aged 16+ in employment (check the table notes on the
+# exact universe; the UK Data Service page says "in employment the week before the census").
+# Classification is UK SIC. This stub is deliberately incomplete: run
+#   python -m build.inspect data/census/UV605-oa.csv
+# to list the real column headers, then paste the generated `categories:` below.
+id: uv605_industry
+status: draft
+table: UV605
+title: Industry of employment
+source:
+  file: data/census/UV605-oa.csv      # TODO save the Output Areas CSV here
+  geography: oa
+  code_column: TODO                   # TODO header of the OA code column
+  skip_rows: 0                        # TODO check the first rows of the CSV
+  encoding: utf-8-sig
+  citation: "Scotland's Census 2022, UV605 Industry, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe:
+  label: "People aged 16 and over in employment"
+  total_column: TODO                  # TODO header of the 'All people' column
+categories: []                        # TODO paste from `build.inspect`, then shorten the labels
+measures:
+  - id: share
+    kind: share
+    selector: category                # map: pick one industry, shaded by its % of employed people
+    label: "% of employed people"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20               # OA with fewer than 20 employed people: grey, not a noisy %
+  - id: count
+    kind: count
+    label: "Employed people"
+    unit: "people"
+    decimals: 0

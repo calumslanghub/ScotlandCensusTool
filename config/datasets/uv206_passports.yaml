@@ -1,0 +1,65 @@
+# UV206: passports held. A person can hold several, so categories overlap: shares are of
+# all people and do not add up to 100. "Europe: Total" is a subtotal and is not read.
+id: uv206_passports
+status: ready
+table: UV206
+title: Passports held
+scheme: GnBu
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV206 - Passports held.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV206b - Passports held (9) by sex by age (6).csv", prefix: UV206b}
+  citation: "Scotland's Census 2022, UV206 and UV206b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people", denominator: total_column}
+categories:
+  - {id: uk, column: "Europe: United Kingdom", label: United Kingdom, short: UK}
+  - {id: ireland, column: "Europe: Ireland", label: Ireland}
+  - {id: eu, column: "Europe: EU member countries", label: EU member countries, short: EU}
+  - {id: rest_of_europe, column: "Europe: Rest of Europe", label: Rest of Europe, short: Rest of Europe}
+  - {id: africa, column: "Africa", label: Africa}
+  - {id: middle_east_asia, column: "Middle East and Asia", label: Middle East and Asia, short: Mid. East & Asia}
+  - {id: oceania, column: "Antarctica and Oceania", label: Antarctica and Oceania, short: Oceania}
+  - {id: americas, column: "The Americas and the Caribbean", label: The Americas and the Caribbean, short: Americas}
+  - {id: no_passport, column: "No Passport", label: No passport, short: None}
+  - {id: no_uk, rest_of: [uk], label: No UK passport, short: No UK}
+counts: [uk, ireland, eu, rest_of_europe, africa, middle_east_asia, oceania, americas]
+note: "People can hold more than one passport, so the shares overlap. 'No UK passport' includes people who hold no passport."
+# UV206b (by sex and age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+splits:
+  - group: age
+    prefix: UV206b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      uk: "Europe: United Kingdom"
+      ireland: "Europe: Ireland"
+      eu: "Europe: EU member countries"
+      rest_of_europe: "Europe: Rest of Europe"
+      africa: "Africa"
+      middle_east_asia: "Middle East and Asia"
+      oceania: "Antarctica and Oceania"
+      americas: "The Americas and the Caribbean"
+      no_passport: "No Passport"
+  - group: sex
+    prefix: UV206b
+    column: "{header} - {band} - Total"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents:
+      uk: "Europe: United Kingdom"
+      ireland: "Europe: Ireland"
+      eu: "Europe: EU member countries"
+      rest_of_europe: "Europe: Rest of Europe"
+      africa: "Africa"
+      middle_east_asia: "Middle East and Asia"
+      oceania: "Antarctica and Oceania"
+      americas: "The Americas and the Caribbean"
+      no_passport: "No Passport"

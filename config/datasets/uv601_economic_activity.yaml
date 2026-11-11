@@ -1,0 +1,51 @@
+# UV601: economic activity. The CSV repeats its breakdown for people who are not full-time
+# students and for full-time students; every "Total" column is a subtotal and is never summed
+# twice. The published groups below add the two student/non-student halves together.
+id: uv601_economic_activity
+status: ready
+table: UV601
+title: Economic activity
+scheme: Greens
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV601 - Economic activity.csv
+  citation: "Scotland's Census 2022, UV601, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over", total_column: "All people aged 16 and over"}
+categories:
+  # --- raw columns, not students ---
+  - {id: act_total, column: "Economically Active (excluding full time students) - Total", subtotal: true, emit: false}
+  - {id: emp_total, column: "Economically Active (excluding full-time students) - Employee - Total", subtotal: true, emit: false}
+  - {id: emp_pt, column: "Economically Active (excluding full-time students) - Employee - Part-time", emit: false}
+  - {id: emp_ft, column: "Economically Active (excluding full-time students) - Employee - Full-time", emit: false}
+  - {id: semp_e_total, column: "Economically Active (excluding full-time students) - Self-employed with employees - Total", subtotal: true, emit: false}
+  - {id: semp_e_pt, column: "Economically Active (excluding full-time students) - Self-employed with employees - Part-time", emit: false}
+  - {id: semp_e_ft, column: "Economically Active (excluding full-time students) - Self-employed with employees - Full-time", emit: false}
+  - {id: semp_n_total, column: "Economically Active (excluding full-time students) - Self-employed without employees - Total", subtotal: true, emit: false}
+  - {id: semp_n_pt, column: "Economically Active (excluding full-time students) - Self-employed without employees - Part-time", emit: false}
+  - {id: semp_n_ft, column: "Economically Active (excluding full-time students) - Self-employed without employees - Full-time", emit: false}
+  - {id: unemp, column: "Economically Active (excluding full-time students) - Unemployed - Available for work", emit: false}
+  # --- raw columns, full-time students ---
+  - {id: stu_total, column: "Economically Active full-time students - Total", subtotal: true, emit: false}
+  - {id: stu_emp_total, column: "Economically Active full-time students - Employee - Total", subtotal: true, emit: false}
+  - {id: stu_emp_pt, column: "Economically Active full-time students - Employee - Part-time", emit: false}
+  - {id: stu_emp_ft, column: "Economically Active full-time students - Employee - Full-time", emit: false}
+  - {id: stu_se_total, column: "Economically Active full-time students - Self-employed with employees - Total", subtotal: true, emit: false}
+  - {id: stu_se_pt, column: "Economically Active full-time students - Self-employed with employees - Part-time", emit: false}
+  - {id: stu_se_ft, column: "Economically Active full-time students - Self-employed with employees - Full-time", emit: false}
+  - {id: stu_sn_total, column: "Economically Active full-time students - Self-employed without employees - Total", subtotal: true, emit: false}
+  - {id: stu_sn_pt, column: "Economically Active full-time students - Self-employed without employees - Part-time", emit: false}
+  - {id: stu_sn_ft, column: "Economically Active full-time students - Self-employed without employees - Full-time", emit: false}
+  - {id: stu_unemp, column: "Economically Active full-time students - Unemployed - Available for work", emit: false}
+  # --- raw columns, inactive ---
+  - {id: inact_total, column: "Economically Inactive - Total", subtotal: true, emit: false}
+  - {id: retired, column: "Economically inactive - Retired", parent: inactive, label: Retired, short: Retired}
+  - {id: student, column: "Economically inactive - Student", parent: inactive, label: Student, short: Student}
+  - {id: home_family, column: "Economically inactive - Looking after home/ family", parent: inactive, label: Looking after home or family, short: Home/family}
+  - {id: sick_disabled, column: "Economically inactive - Long term sick or disabled", parent: inactive, label: Long-term sick or disabled, short: Sick/disabled}
+  - {id: other_inactive, column: "Economically inactive - Other", parent: inactive, label: Other, short: Other}
+  # --- published groups ---
+  - {id: active, of: [act_total, stu_total], label: Economically active, short: Active}
+  - {id: employee, of: [emp_total, stu_emp_total], parent: active, label: Employee, short: Employee}
+  - {id: self_employed, of: [semp_e_total, semp_n_total, stu_se_total, stu_sn_total], parent: active, label: Self-employed, short: Self-employed}
+  - {id: unemployed, of: [unemp, stu_unemp], parent: active, label: Unemployed (available for work), short: Unemployed}
+  - {id: inactive, of: [inact_total], label: Economically inactive, short: Inactive}
+note: "Economically active includes full-time students who are working or looking for work."

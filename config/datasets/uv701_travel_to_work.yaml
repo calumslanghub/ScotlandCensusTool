@@ -1,0 +1,81 @@
+# UV701 + UV701b: method of travel to work. UV701 has eleven methods; UV701b (by age) groups
+# them into eight, so the shown rows follow UV701b and UV701's finer methods are their sub-types
+# (rail -> train / underground, other -> taxi / motorcycle / other). UV701b's age bands are a
+# second split (`group: age`) of each of the eight, for the age breakdown pie. Shares are of
+# UV701's methods; UV701b's counts are disclosure-controlled separately, so a method's age
+# bands add up to its share only approximately.
+id: uv701_travel_to_work
+status: ready
+table: UV701
+title: Method of travel to work
+scheme: Greens
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV701 - Method of travel to work.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV701b - Method of travel to work by age (5).csv", prefix: UV701b}
+  citation: "Scotland's Census 2022, UV701 and UV701b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in employment", total_column: "All people aged 16 and over in employment the week before the census (including full-time students if they gave a work address as the address they primarily travel to for work or study)"}
+categories:
+  - {id: wfh, column: "Work mainly at or from home", label: Work mainly at or from home, short: Home}
+  - {id: driving, column: "Driving a car or van", label: Driving a car or van, short: Driving}
+  - {id: passenger, column: "Passenger in a car or van", label: Passenger in a car or van, short: Passenger}
+  - {id: taxi, column: "Taxi or private hire", parent: other_methods, label: Taxi or private hire, short: Taxi}
+  - {id: motorcycle, column: "Motorcycle, scooter or moped", parent: other_methods, label: "Motorcycle, scooter or moped", short: Motorcycle}
+  - {id: foot, column: "On foot", label: On foot, short: Walk}
+  - {id: bicycle, column: "Bicycle", label: Bicycle, short: Bicycle}
+  - {id: bus, column: "Bus, minibus or coach", label: "Bus, minibus or coach", short: Bus}
+  - {id: train, column: "Train", parent: rail, label: Train, short: Train}
+  - {id: underground, column: "Underground, subway or tram", parent: rail, label: "Underground, subway or tram", short: Subway/tram}
+  - {id: other, column: "Other", parent: other_methods, label: Other method, short: Other}
+  - {id: rail, of: [train, underground], label: "Train, underground, subway or tram", short: Rail}
+  - {id: other_methods, of: [taxi, motorcycle, other], label: "Taxi, motorcycle or other", short: Other}
+  # --- UV701b: each of the eight methods by age (never in the denominator) ---
+  # Work mainly at or from home
+  - {id: wfh_a16_24, column: "UV701b: Work mainly at or from home - 16 to 24", parent: wfh, group: age, label: "Work mainly at or from home, aged 16 to 24", short: "16 to 24"}
+  - {id: wfh_a25_34, column: "UV701b: Work mainly at or from home - 25 to 34", parent: wfh, group: age, label: "Work mainly at or from home, aged 25 to 34", short: "25 to 34"}
+  - {id: wfh_a35_49, column: "UV701b: Work mainly at or from home - 35 to 49", parent: wfh, group: age, label: "Work mainly at or from home, aged 35 to 49", short: "35 to 49"}
+  - {id: wfh_a50_64, column: "UV701b: Work mainly at or from home - 50 to 64", parent: wfh, group: age, label: "Work mainly at or from home, aged 50 to 64", short: "50 to 64"}
+  - {id: wfh_a65p, column: "UV701b: Work mainly at or from home - 65 and over", parent: wfh, group: age, label: "Work mainly at or from home, aged 65 and over", short: "65 and over"}
+  # Driving a car or van
+  - {id: driving_a16_24, column: "UV701b: Driving a car or van - 16 to 24", parent: driving, group: age, label: "Driving a car or van, aged 16 to 24", short: "16 to 24"}
+  - {id: driving_a25_34, column: "UV701b: Driving a car or van - 25 to 34", parent: driving, group: age, label: "Driving a car or van, aged 25 to 34", short: "25 to 34"}
+  - {id: driving_a35_49, column: "UV701b: Driving a car or van - 35 to 49", parent: driving, group: age, label: "Driving a car or van, aged 35 to 49", short: "35 to 49"}
+  - {id: driving_a50_64, column: "UV701b: Driving a car or van - 50 to 64", parent: driving, group: age, label: "Driving a car or van, aged 50 to 64", short: "50 to 64"}
+  - {id: driving_a65p, column: "UV701b: Driving a car or van - 65 and over", parent: driving, group: age, label: "Driving a car or van, aged 65 and over", short: "65 and over"}
+  # Passenger in a car or van
+  - {id: passenger_a16_24, column: "UV701b: Passenger in a car or van - 16 to 24", parent: passenger, group: age, label: "Passenger in a car or van, aged 16 to 24", short: "16 to 24"}
+  - {id: passenger_a25_34, column: "UV701b: Passenger in a car or van - 25 to 34", parent: passenger, group: age, label: "Passenger in a car or van, aged 25 to 34", short: "25 to 34"}
+  - {id: passenger_a35_49, column: "UV701b: Passenger in a car or van - 35 to 49", parent: passenger, group: age, label: "Passenger in a car or van, aged 35 to 49", short: "35 to 49"}
+  - {id: passenger_a50_64, column: "UV701b: Passenger in a car or van - 50 to 64", parent: passenger, group: age, label: "Passenger in a car or van, aged 50 to 64", short: "50 to 64"}
+  - {id: passenger_a65p, column: "UV701b: Passenger in a car or van - 65 and over", parent: passenger, group: age, label: "Passenger in a car or van, aged 65 and over", short: "65 and over"}
+  # On foot
+  - {id: foot_a16_24, column: "UV701b: On foot - 16 to 24", parent: foot, group: age, label: "On foot, aged 16 to 24", short: "16 to 24"}
+  - {id: foot_a25_34, column: "UV701b: On foot - 25 to 34", parent: foot, group: age, label: "On foot, aged 25 to 34", short: "25 to 34"}
+  - {id: foot_a35_49, column: "UV701b: On foot - 35 to 49", parent: foot, group: age, label: "On foot, aged 35 to 49", short: "35 to 49"}
+  - {id: foot_a50_64, column: "UV701b: On foot - 50 to 64", parent: foot, group: age, label: "On foot, aged 50 to 64", short: "50 to 64"}
+  - {id: foot_a65p, column: "UV701b: On foot - 65 and over", parent: foot, group: age, label: "On foot, aged 65 and over", short: "65 and over"}
+  # Bicycle
+  - {id: bicycle_a16_24, column: "UV701b: Bicycle - 16 to 24", parent: bicycle, group: age, label: "Bicycle, aged 16 to 24", short: "16 to 24"}
+  - {id: bicycle_a25_34, column: "UV701b: Bicycle - 25 to 34", parent: bicycle, group: age, label: "Bicycle, aged 25 to 34", short: "25 to 34"}
+  - {id: bicycle_a35_49, column: "UV701b: Bicycle - 35 to 49", parent: bicycle, group: age, label: "Bicycle, aged 35 to 49", short: "35 to 49"}
+  - {id: bicycle_a50_64, column: "UV701b: Bicycle - 50 to 64", parent: bicycle, group: age, label: "Bicycle, aged 50 to 64", short: "50 to 64"}
+  - {id: bicycle_a65p, column: "UV701b: Bicycle - 65 and over", parent: bicycle, group: age, label: "Bicycle, aged 65 and over", short: "65 and over"}
+  # Bus, minibus or coach
+  - {id: bus_a16_24, column: "UV701b: Bus, minibus or coach - 16 to 24", parent: bus, group: age, label: "Bus, minibus or coach, aged 16 to 24", short: "16 to 24"}
+  - {id: bus_a25_34, column: "UV701b: Bus, minibus or coach - 25 to 34", parent: bus, group: age, label: "Bus, minibus or coach, aged 25 to 34", short: "25 to 34"}
+  - {id: bus_a35_49, column: "UV701b: Bus, minibus or coach - 35 to 49", parent: bus, group: age, label: "Bus, minibus or coach, aged 35 to 49", short: "35 to 49"}
+  - {id: bus_a50_64, column: "UV701b: Bus, minibus or coach - 50 to 64", parent: bus, group: age, label: "Bus, minibus or coach, aged 50 to 64", short: "50 to 64"}
+  - {id: bus_a65p, column: "UV701b: Bus, minibus or coach - 65 and over", parent: bus, group: age, label: "Bus, minibus or coach, aged 65 and over", short: "65 and over"}
+  # Train, underground, subway or tram
+  - {id: rail_a16_24, column: "UV701b: Train, underground, subway or tram - 16 to 24", parent: rail, group: age, label: "Train, underground, subway or tram, aged 16 to 24", short: "16 to 24"}
+  - {id: rail_a25_34, column: "UV701b: Train, underground, subway or tram - 25 to 34", parent: rail, group: age, label: "Train, underground, subway or tram, aged 25 to 34", short: "25 to 34"}
+  - {id: rail_a35_49, column: "UV701b: Train, underground, subway or tram - 35 to 49", parent: rail, group: age, label: "Train, underground, subway or tram, aged 35 to 49", short: "35 to 49"}
+  - {id: rail_a50_64, column: "UV701b: Train, underground, subway or tram - 50 to 64", parent: rail, group: age, label: "Train, underground, subway or tram, aged 50 to 64", short: "50 to 64"}
+  - {id: rail_a65p, column: "UV701b: Train, underground, subway or tram - 65 and over", parent: rail, group: age, label: "Train, underground, subway or tram, aged 65 and over", short: "65 and over"}
+  # Taxi, motorcycle or other
+  - {id: other_methods_a16_24, column: "UV701b: Taxi, motorcycle and all other methods of travel to work - 16 to 24", parent: other_methods, group: age, label: "Taxi, motorcycle or other, aged 16 to 24", short: "16 to 24"}
+  - {id: other_methods_a25_34, column: "UV701b: Taxi, motorcycle and all other methods of travel to work - 25 to 34", parent: other_methods, group: age, label: "Taxi, motorcycle or other, aged 25 to 34", short: "25 to 34"}
+  - {id: other_methods_a35_49, column: "UV701b: Taxi, motorcycle and all other methods of travel to work - 35 to 49", parent: other_methods, group: age, label: "Taxi, motorcycle or other, aged 35 to 49", short: "35 to 49"}
+  - {id: other_methods_a50_64, column: "UV701b: Taxi, motorcycle and all other methods of travel to work - 50 to 64", parent: other_methods, group: age, label: "Taxi, motorcycle or other, aged 50 to 64", short: "50 to 64"}
+  - {id: other_methods_a65p, column: "UV701b: Taxi, motorcycle and all other methods of travel to work - 65 and over", parent: other_methods, group: age, label: "Taxi, motorcycle or other, aged 65 and over", short: "65 and over"}
+note: "Working mainly at or from home is kept as a method. The age breakdown is from UV701b, which groups train with underground and taxi with motorcycle and other methods."

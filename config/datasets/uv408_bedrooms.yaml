@@ -1,0 +1,18 @@
+id: uv408_bedrooms
+status: ready
+table: UV408
+title: Number of bedrooms
+scheme: Blues
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV408 - Number of bedrooms.csv"
+  citation: "Scotland's Census 2022, UV408, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: one, column: "One bedroom", label: One bedroom, short: "1", value: 1}
+  - {id: two, column: "Two bedrooms", label: Two bedrooms, short: "2", value: 2}
+  - {id: three, column: "Three bedrooms", label: Three bedrooms, short: "3", value: 3}
+  - {id: four, column: "Four bedrooms", label: Four bedrooms, short: "4", value: 4}
+  - {id: five_plus, column: "Five or more bedrooms", label: Five or more bedrooms, short: 5+, value: 5}
+means:
+  - {id: mean_bedrooms, label: Average number of bedrooms, short: Bedrooms, unit: bedrooms per household, decimals: 2}
+note: "Average bedrooms counts 'five or more' as five, so it understates the true average slightly."

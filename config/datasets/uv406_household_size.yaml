@@ -1,0 +1,21 @@
+id: uv406_household_size
+status: ready
+table: UV406
+title: Household size
+scheme: Greens
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV406 - Household size.csv
+  citation: "Scotland's Census 2022, UV406, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied household spaces", total_column: "All occupied household spaces", unit: households}
+categories:
+  - {id: one, column: "One person", label: One person, short: "1", value: 1}
+  - {id: two, column: "Two people", label: Two people, short: "2", value: 2}
+  - {id: three, column: "Three people", label: Three people, short: "3", value: 3}
+  - {id: four, column: "Four people", label: Four people, short: "4", value: 4}
+  - {id: five, column: "Five people", label: Five people, short: "5", value: 5}
+  - {id: six, column: "Six people", label: Six people, short: "6", value: 6}
+  - {id: seven, column: "Seven people", label: Seven people, short: "7", value: 7}
+  - {id: eight_plus, column: "Eight or more people", label: Eight or more people, short: 8+, value: 8}
+means:
+  - {id: mean_size, label: Average household size, short: Household size, unit: people per household, decimals: 2}
+note: "Average household size counts 'eight or more people' as eight."

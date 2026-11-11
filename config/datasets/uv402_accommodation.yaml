@@ -1,0 +1,21 @@
+# UV402: accommodation type of households. The "Total" columns are subtotals of the types
+# listed under them: they are shown (and drilled into) but never summed twice.
+id: uv402_accommodation
+status: ready
+table: UV402
+title: Accommodation type
+scheme: Blues
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV402 - Accommodation type - Households.csv
+  citation: "Scotland's Census 2022, UV402, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: house, column: "Whole house or bungalow: Total", subtotal: true, label: Whole house or bungalow, short: House}
+  - {id: detached, column: "Whole house or bungalow: Detached", parent: house, label: Detached, short: Detached}
+  - {id: semi_detached, column: "Whole house or bungalow: Semi-detached", parent: house, label: Semi-detached, short: Semi}
+  - {id: terraced, column: "Whole house or bungalow: Terraced (including end-terrace)", parent: house, label: Terraced (including end-terrace), short: Terraced}
+  - {id: flat, column: "Flat, maisonette or apartment: Total", subtotal: true, label: "Flat, maisonette or apartment", short: Flat}
+  - {id: purpose_built, column: "Flat, maisonette or apartment: Purpose-built block of flats or tenement", parent: flat, label: Purpose-built block or tenement, short: Purpose-built}
+  - {id: converted, column: "Flat, maisonette or apartment: Part of a converted or shared house (including bed-sits)", parent: flat, label: Converted or shared house (including bed-sits), short: Converted}
+  - {id: commercial, column: "Flat, maisonette or apartment: In a commercial building", parent: flat, label: In a commercial building, short: Commercial}
+  - {id: caravan, column: "Caravan or other mobile or temporary structure", label: Caravan or other mobile or temporary structure, short: Caravan}

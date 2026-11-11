@@ -1,0 +1,18 @@
+id: uv405_cars
+status: ready
+table: UV405
+title: Car or van availability
+scheme: Greens
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV405 - Car or van availability.csv
+  citation: "Scotland's Census 2022, UV405, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: none, column: "Number of cars or vans in household: No cars or vans", label: No car or van, short: None, value: 0}
+  - {id: one, column: "Number of cars or vans in household: One car or van", label: One car or van, short: One, value: 1}
+  - {id: two, column: "Number of cars or vans in household: Two cars or vans", label: Two cars or vans, short: Two, value: 2}
+  - {id: three, column: "Number of cars or vans in household: Three cars or vans", label: Three cars or vans, short: Three, value: 3}
+  - {id: four_plus, column: "Number of cars or vans in household: Four or more cars or vans", label: Four or more cars or vans, short: 4+, value: 4}
+means:
+  - {id: mean_cars, label: Average cars or vans per household, short: Cars per household, unit: cars or vans, decimals: 2}
+note: "Average cars or vans counts 'four or more' as four, so it understates the true average slightly."

@@ -1,0 +1,29 @@
+# UV211 + UV211b: British Sign Language (BSL) skills. UV211b (by age; its file name starts
+# "Uv211b") has five age bands, with 25 to 49 as one band.
+id: uv211_bsl
+status: ready
+table: UV211
+title: British Sign Language (BSL) skills
+scheme: Purples
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV211 - British Sign Language (BSL) skills.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/Uv211b - British Sign Language (BSL) skills by age (6).csv", prefix: UV211b}
+  citation: "Scotland's Census 2022, UV211 and UV211b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: bsl_user, column: "BSL User", label: BSL user, short: BSL user}
+  - {id: not_bsl_user, column: "Not a BSL user", label: Not a BSL user, short: Not a user}
+splits:
+  - group: age
+    prefix: UV211b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "3 - 15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_49, header: "25 - 49", label: "aged 25 to 49", short: "25 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      bsl_user: "BSL User"
+      not_bsl_user: "Not a BSL user"

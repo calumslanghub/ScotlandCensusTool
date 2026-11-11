@@ -1,0 +1,42 @@
+# UV209 + UV209b: Scots language skills (the same seven combinations as Gaelic, UV208).
+# UV209b (by age) splits each combination by age.
+id: uv209_scots
+status: ready
+table: UV209
+title: Scots language skills
+scheme: YlGn
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV209 - Scots language skills.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV209b - Scots language skills (7) by age.csv", prefix: UV209b}
+  citation: "Scotland's Census 2022, UV209 and UV209b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: understands_only, column: "Understands but does not speak, read or write Scots", label: Understands only, short: Understands}
+  - {id: speaks_reads_writes, column: "Speaks, reads and writes Scots", label: "Speaks, reads and writes", short: All skills}
+  - {id: speaks_only, column: "Speaks but does not read or write Scots", label: Speaks only, short: Speaks}
+  - {id: speaks_reads, column: "Speaks and reads but does not write Scots", label: Speaks and reads, short: Speaks/reads}
+  - {id: reads_only, column: "Reads but does not speak or write Scots", label: Reads only, short: Reads}
+  - {id: other_combination, column: "Other combination of skills in Scots", label: Other combination, short: Other}
+  - {id: no_skills, column: "No skills in Scots", label: No skills, short: None}
+  - {id: any_skills, rest_of: [no_skills], label: Any Scots skills, short: Any}
+  - {id: speaks, of: [speaks_reads_writes, speaks_only, speaks_reads], label: Speaks Scots, short: Speaks}
+splits:
+  - group: age
+    prefix: UV209b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "3 - 15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      understands_only: "Understands but does not speak, read or write Scots"
+      speaks_reads_writes: "Speaks, reads and writes Scots"
+      speaks_only: "Speaks but does not read or write Scots"
+      speaks_reads: "Speaks and reads but does not write Scots"
+      reads_only: "Reads but does not speak or write Scots"
+      other_combination: "Other combination of skills in Scots"
+      no_skills: "No skills in Scots"

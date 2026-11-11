@@ -1,0 +1,35 @@
+Initial Attempt Structure
+
+Demographic:
+	Average Age - UV103 - Age by Single Year - Use totals to find average - colour coded by average.
+	Marital/Civil Partnership Status - UV104 - Totals, would have to be averaged by people over 16 then % for each option - options are selectable through dropdown- side view 	is a bar graph % of each option for each geographic level.  
+	Religion - UV205 - Totals, would be averaged then %. dropdown option to select religion and show map - side view bar graph of %.
+	Passports - UV206 - Totals, average then %, map initially shows % of non British passports - bar graph showing the top passports and the total number per geography. 
+	Gaelic Language Skills - UV208 - Totals spilt, group all understanding for map view, side bar graph can show the differences but the initial map view would be % of 	population with Gaelic language skills.
+	Main Language - UV212 - Totals, the five largest totals should be selectable on map dropdown. The top 5 languages per geography will change in the bar chart side panel 	view. 
+
+Health: 
+	General Health - UV302 - Totals, Self Reported General Health, (Very Good - Very Bad, score 1-5) average on the map then a dropdown option to chose to view the %'s of 	each option, Graph shows the %'s for all responses.
+	Disability - UV303 - Totals, how much are daily activities limited, same approach as general health. 
+	Health Conditions - UV304 - List of Health Conditions, have % of population with the condition as a dropdown selectable. Bar chart would show highest the % of each given 	condition.
+
+Housing:
+	Accommodation Type (Households) - UV402 - Totals for house and flat, % in map view. temporary/caravan, then after selecting flat or house the additional options are 	offered on map view. Clicking on the bar in the sideview causes drilldown into specific types in pie chart.
+	Household Tenure (Households) - UV404 - Totals for ownership type, % in map view, then same drill down within an option is possible. 
+	Household Size (Households) - UV406 - 1 - 8+, average household size as an option assuming 8+ is 8. Then clickable dropdown options to change the size in map view.
+	Occupancy Rating of Bedrooms - UV415 - Occupancy rating +2, +1, means house is under occupied, - means house is overcrowded, 0 means house is perfectly occupied, make an 	average occupancy score based on the totals of each per geography this is initially shown on the map. Each option % of total houses is selectable as a dropdown option. 
+
+Education:
+	Highest Level of Education - UV501 - Totals, would % by total population over 16, each option selectable through a dropdown on map. Initial view is % with no 	qualifications. Bar graph shows all on sidebar. 
+
+Employment:
+	Economic Activity - UV601 - Totals, % by population over 16, initial view shows % economically active. Graph shows economically active vs inactive, drill down then adds 	further options. 
+	Industry - UV605 - Employment by industry, totals, % by number of people employed, different options are selectable through the dropdown option.
+
+Transport:
+	Car or Van Availability (Households) - UV405 - Totals 0, 1, 2, 3, 4+, % of response per number households, average assuming that 4+ is 4, all options are selectable 	through dropdown menu.
+	Method of Travel to Work - UV701/UV701b - methods of travel to work (including work from home, keep as an option), dropdown to select method, and side graph, UV701b offers by age breakdown, group ages and offer as drilldown information.
+	Distance Traveled to Work - UV703/UV703b - distanced travelled to work (including work from home, keep as an option), dropdown to select method, and side graph, UV703b offers by age breakdown, group ages and offer as drilldown information.
+	 
+	 
+

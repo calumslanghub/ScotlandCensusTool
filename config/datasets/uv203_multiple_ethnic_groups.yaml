@@ -1,0 +1,18 @@
+# UV203: whether the members of a household share an ethnic group. The title line says "all
+# occupied household spaces"; the total column is "All occupied households".
+id: uv203_multiple_ethnic_groups
+status: ready
+table: UV203
+title: Multiple ethnic groups in households
+scheme: PuBuGn
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV203 - Multiple ethnic groups.csv"
+  citation: "Scotland's Census 2022, UV203, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: one_person, column: "One person household", label: One person household, short: One person}
+  - {id: same_group, column: "All household members have the same ethnic group", label: All household members have the same ethnic group, short: Same group}
+  - {id: generations, column: "Different identities between the generations only", label: Different ethnic groups between the generations only, short: Between generations}
+  - {id: partnerships, column: "Different identities within partnerships (whether or not also different identities between generations)", label: Different ethnic groups within partnerships, short: Within partnerships}
+  - {id: other_combination, column: "Any other combination of multiple ethnic identities", label: Any other combination of ethnic groups, short: Other combination}
+  - {id: multiple, of: [generations, partnerships, other_combination], label: Households with more than one ethnic group, short: Multiple groups}

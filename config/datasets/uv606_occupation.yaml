@@ -1,0 +1,48 @@
+# UV606: occupation (SOC 2020). Nine major groups, each a "- Total" (subtotal) column followed
+# by its sub-major groups, whose headers carry no prefix.
+# Industry x occupation: do NOT derive it from UV605 and UV606 (see uv605_industry.yaml).
+id: uv606_occupation
+status: ready
+table: UV606
+title: Occupation
+scheme: Blues
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV606 - Occupation.csv"
+  citation: "Scotland's Census 2022, UV606, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in employment", total_column: "All people aged 16 and over in employment the week before the census"}
+categories:
+  - {id: managers, column: "Managers, Directors and Senior Officials - Total", subtotal: true, label: "Managers, directors and senior officials", short: Managers}
+  - {id: corporate_managers, column: "Corporate Managers and Directors", parent: managers, label: Corporate managers and directors, short: Corporate}
+  - {id: other_managers, column: "Other Managers and Proprietors", parent: managers, label: Other managers and proprietors, short: Other managers}
+  - {id: professional, column: "Professional Occupations - Total", subtotal: true, label: Professional occupations, short: Professional}
+  - {id: science_professionals, column: "Science, Research, Engineering and Technology Professionals", parent: professional, label: "Science, research, engineering and technology professionals", short: Science & tech}
+  - {id: health_professionals, column: "Health Professionals", parent: professional, label: Health professionals, short: Health}
+  - {id: teaching_professionals, column: "Teaching and Educational Professionals", parent: professional, label: Teaching and educational professionals, short: Teaching}
+  - {id: business_professionals, column: "Business, Media and Public Service Professionals", parent: professional, label: "Business, media and public service professionals", short: Business & media}
+  - {id: associate, column: "Associate Professional and Technical Occupations - Total", subtotal: true, label: Associate professional and technical occupations, short: Associate prof.}
+  - {id: science_associate, column: "Science, Engineering and Technology Associate Professionals", parent: associate, label: "Science, engineering and technology associate professionals", short: Science & tech}
+  - {id: health_associate, column: "Health and Social Care Associate Professionals", parent: associate, label: Health and social care associate professionals, short: Health & care}
+  - {id: protective, column: "Protective Service Occupations", parent: associate, label: Protective service occupations, short: Protective}
+  - {id: culture, column: "Culture, Media and Sports Occupations", parent: associate, label: "Culture, media and sports occupations", short: Culture & sport}
+  - {id: business_associate, column: "Business and Public Service Associate Professionals", parent: associate, label: Business and public service associate professionals, short: Business}
+  - {id: admin, column: "Administrative and Secretarial Occupations - Total", subtotal: true, label: Administrative and secretarial occupations, short: Admin}
+  - {id: administrative, column: "Administrative Occupations", parent: admin, label: Administrative occupations, short: Administrative}
+  - {id: secretarial, column: "Secretarial and related Occupations", parent: admin, label: Secretarial and related occupations, short: Secretarial}
+  - {id: skilled_trades, column: "Skilled Trade Occupations - Total", subtotal: true, label: Skilled trades occupations, short: Skilled trades}
+  - {id: agriculture_trades, column: "Skilled Agriculture and related Trades", parent: skilled_trades, label: Skilled agricultural and related trades, short: Agriculture}
+  - {id: metal_trades, column: "Skilled Metal, Electrical and Electronic Trades", parent: skilled_trades, label: "Skilled metal, electrical and electronic trades", short: Metal & electrical}
+  - {id: construction_trades, column: "Skilled Construction and Building Trades", parent: skilled_trades, label: Skilled construction and building trades, short: Construction}
+  - {id: other_trades, column: "Textiles, Printing and Other Skilled Trades", parent: skilled_trades, label: "Textiles, printing and other skilled trades", short: Other trades}
+  - {id: caring_leisure, column: "Caring, Leisure and Other Service Occupations - Total", subtotal: true, label: "Caring, leisure and other service occupations", short: Caring & leisure}
+  - {id: caring, column: "Caring Personal Service Occupations", parent: caring_leisure, label: Caring personal service occupations, short: Caring}
+  - {id: leisure, column: "Leisure, Travel and Related Personal Service", parent: caring_leisure, label: "Leisure, travel and related personal service occupations", short: Leisure & travel}
+  - {id: enforcement, column: "Community and Civil Enforcement Occupations", parent: caring_leisure, label: Community and civil enforcement occupations, short: Enforcement}
+  - {id: sales_service, column: "Sales and Customer Service Occupations - Total", subtotal: true, label: Sales and customer service occupations, short: Sales & service}
+  - {id: sales, column: "Sales Occupations", parent: sales_service, label: Sales occupations, short: Sales}
+  - {id: customer_service, column: "Customer Service Occupations", parent: sales_service, label: Customer service occupations, short: Customer service}
+  - {id: operatives, column: "Process, Plant and Machine Operatives - Total", subtotal: true, label: "Process, plant and machine operatives", short: Operatives}
+  - {id: process_operatives, column: "Process, Plant and Machine Operatives", parent: operatives, label: "Process, plant and machine operatives (sub-major group)", short: Process & plant}
+  - {id: drivers, column: "Transport and Mobile machine Drivers and Operatives", parent: operatives, label: Transport and mobile machine drivers and operatives, short: Drivers}
+  - {id: elementary, column: "Elementary Occupations - Total", subtotal: true, label: Elementary occupations, short: Elementary}
+  - {id: elementary_trades, column: "Elementary Trades and Related Occupations", parent: elementary, label: Elementary trades and related occupations, short: Trades}
+  - {id: elementary_service, column: "Elementary Administration and Service Occupations", parent: elementary, label: Elementary administration and service occupations, short: Admin & service}

@@ -1,0 +1,35 @@
+id: uv303_disability
+status: ready
+table: UV303
+title: Disability
+scheme: Reds
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV303 - Disability.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV303b - Disability by age (6).csv", prefix: UV303b}
+  citation: "Scotland's Census 2022, UV303 and UV303b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: limited_a_lot, column: "Day-to-day activities limited a lot", label: Limited a lot, value: 3}
+  - {id: limited_a_little, column: "Day-to-day activities limited a little", label: Limited a little, short: A little, value: 2}
+  - {id: not_limited, column: "Day-to-day activities not limited", label: Not limited, value: 1}
+means:
+  - {id: mean_score, label: "Average limitation score (1 not limited – 3 limited a lot)", short: Limitation score, unit: score, decimals: 2}
+note: "Average score: not limited = 1, limited a little = 2, limited a lot = 3, so a higher score means more limitation."
+# UV303b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+splits:
+  - group: age
+    prefix: UV303b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 to 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 to 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 to 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 to 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      limited_a_lot: "Day-to-day activities limited a lot"
+      limited_a_little: "Day-to-day activities limited a little"
+      not_limited: "Day-to-day activities not limited"

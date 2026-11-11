@@ -1,0 +1,22 @@
+# UV403: household tenure, counting the people in households (UV404 counts the households).
+# "Total" columns are subtotals (see uv402).
+id: uv403_tenure_people
+status: ready
+table: UV403
+title: Household tenure (people)
+scheme: Oranges
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV403 - Household tenure - People.csv"
+  citation: "Scotland's Census 2022, UV403, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people in households", total_column: "All people in households"}
+categories:
+  - {id: owned, column: "Owned: Total", subtotal: true, label: Owned, short: Owned}
+  - {id: owned_outright, column: "Owned: Owned outright", parent: owned, label: Owned outright, short: Outright}
+  - {id: owned_mortgage, column: "Owned: Owned with a mortgage or loan", parent: owned, label: Owned with a mortgage or loan, short: Mortgage}
+  - {id: shared_ownership, column: "Owned: Shared ownership (part owned and part rented)", parent: owned, label: Shared ownership, short: Shared own.}
+  - {id: shared_equity, column: "Owned: Shared Equity (e.g. LIFT or Help-to-Buy)", parent: owned, label: Shared equity, short: Shared equity}
+  - {id: social_rented, column: "Social Rented: Council (LA) or Housing Association/ Registered Social Landlord", label: Social rented (council or housing association), short: Social}
+  - {id: private_rented, column: "Private rented: Total", subtotal: true, label: Private rented, short: Private}
+  - {id: private_landlord, column: "Private rented: Private landlord or letting agency", parent: private_rented, label: Private landlord or letting agency, short: Landlord}
+  - {id: private_other, column: "Private rented: Other", parent: private_rented, label: Other private rented, short: Other}
+  - {id: rent_free, column: "Lives Rent Free", label: Lives rent free, short: Rent free}

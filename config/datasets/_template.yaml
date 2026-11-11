@@ -1,0 +1,90 @@
+# config/datasets/<id>.yaml: one file per Census table (OA-level CSV). Adding a table is a YAML
+# change only: copy this file, set status: ready, and add an indicator for it in
+# config/explorer.yaml (`dataset: <id>`, `headline: <local id>`). See build/census.py.
+#
+# OA is the only input level. Counts are summed to council area, ward, locality, data zone and
+# Scotland, and only then turned into shares and means (percentages are never averaged).
+# Published OA counts are disclosure-controlled, so a row's categories do not add up to the
+# table's own total column exactly: shares use the sum of the leaf categories (default) so a
+# table's shares total 100. Use `denominator: total_column` for tables where people can fall in
+# several categories (passports, long-term conditions).
+#
+# The CSV header is found automatically: the first line starting with a comma that names a
+# column, and every such line directly after it (tables "by age" have two header rows, "by sex
+# by age" three). `-` is zero. To list a file's headers as they are read, ready to paste:
+#   python -m build.table_headers "data/raw/Census/Census2022OutputAreaUV/UV000 - Example.csv"
+# Every CSV in that folder must belong to a dataset (tests/test_census.py checks it).
+
+id: uv000_example              # same as the file name; metric ids are <id>__<category id>
+status: draft                  # draft: hidden from the UI and not read. ready: built.
+table: UV000
+title: Example table
+scheme: Blues                  # default map ramp for its indicators
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV000 - Example.csv
+  # extra:                     # optional: more OA tables joined on the OA code, e.g. the same
+  #   - {file: "data/raw/Census/Census2022OutputAreaUV/UV000b - Example by age (5).csv", prefix: UV000b}
+  #                            # table by age. Their columns are "<prefix>: <header>" and never
+  #                            # count towards the denominator. Header rows are joined with
+  #                            # " - ": "UV000b: Category A - 16 to 24", or with three rows
+  #                            # "UV000b: Category A - Female - 16 to 24". A sub-header that
+  #                            # repeats the one above it, or the table's universe, adds nothing.
+  citation: "Scotland's Census 2022, UV000, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe:
+  label: "All people"          # who is counted, shown under the charts
+  total_column: "All people"   # the CSV's own total (checked against the leaf sum, logged)
+  # denominator: total_column  # default is the sum of the leaf categories
+  # unit: households           # unit of count metrics (default people)
+  # min_denominator: 20        # areas with fewer in the denominator are grey, not 0% or 100%
+
+# Optional: every CSV column whose header is a number (or listed in `aliases`) becomes a hidden
+# category keyed by that number with value key + offset, e.g. single years of age. Derive
+# bands from them with `range`.
+# numeric_columns: {prefix: age, offset: 0.5, aliases: {"Under 1": 0, "100 and over": 100}}
+
+# Each category becomes a share metric (% of the denominator) unless `emit: false`.
+#   column     exact CSV header
+#   subtotal   true for a "Total" column that is the sum of other columns: never in the
+#              denominator
+#   parent     another category id: shown grouped under it in the map's Show dropdown and in a
+#              `breakdown` pie
+#   group      with `parent`: a second split of the parent (e.g. `age`) beside its sub-types. Only
+#              a `breakdown` panel with the same `group` shows it; it is left out of the Show
+#              dropdown (clicking its pie slice still maps it)
+#   value      number used by `means`
+# Derived categories (no column):
+#   of: [ids]        sum of other categories
+#   range: [lo, hi]  sum of numeric_columns categories with key in the range
+#   rest_of: [ids]   denominator minus those categories
+categories:
+  - {id: cat_a, column: "Category A", label: "Category A", short: A, value: 1}
+  - {id: cat_b, column: "Category B", label: "Category B", short: B, value: 2}
+  - {id: any_b, rest_of: [cat_a], label: "Not A"}
+
+# Optional: `splits` writes the grouped categories of a "by age" / "by sex" table for you: one
+# category `<parent id>_<band id>` per parent and band, with `parent` and `group` set, labelled
+# "<parent label>, <band label>". Each needs a `breakdown` panel with the same `group` in
+# config/explorer.yaml, listing the same parents (tests/test_explorer.py checks it).
+#   prefix   the source.extra table the columns are in; omit it for the dataset's own table
+#   column   the header there, from {header} (the parent's, see `parents`) and {band}
+#   parents  category id -> its {header} in that table. Top-level categories only: the front
+#            end shows one level of sub-categories.
+# splits:
+#   - group: age
+#     prefix: UV000b
+#     column: "{header} - {band}"
+#     bands:
+#       - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+#       - {id: a25p, header: "25 and over", label: "aged 25 and over", short: "25 and over"}
+#     parents:
+#       cat_a: "Category A"
+#       cat_b: "Category B"
+
+# Optional: weighted mean of the categories with a `value` (or of `include`, a list of ids).
+# State assumptions for open-ended bands in `note`; it is shown under the charts.
+means:
+  - {id: mean_value, label: "Average value", unit: score, decimals: 2}
+note: "Say here how open-ended bands are treated."
+
+# Optional: categories that also get a count metric `<category id>__n`.
+# counts: [cat_a]

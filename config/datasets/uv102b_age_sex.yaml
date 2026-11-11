@@ -1,0 +1,63 @@
+# UV102b: age in 20 bands by sex. Sex and age are two splits of the same population, so shares
+# are of the table's total (`denominator: total_column`), not of the sum of the categories.
+# Each age band's female / male columns are a `sex` split of the band, read from the table itself.
+id: uv102b_age_sex
+status: ready
+table: UV102b
+title: Age by sex
+scheme: Purples
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV102b - Age (20) by sex.csv"
+  citation: "Scotland's Census 2022, UV102b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people", denominator: total_column}
+categories:
+  - {id: female, column: "Female", label: Female, short: Female}
+  - {id: male, column: "Male", label: Male, short: Male}
+  - {id: a0_4, column: "All people - 0 - 4", label: "Aged 0–4", short: "0–4"}
+  - {id: a5_9, column: "All people - 5 - 9", label: "Aged 5–9", short: "5–9"}
+  - {id: a10_14, column: "All people - 10 - 14", label: "Aged 10–14", short: "10–14"}
+  - {id: a15, column: "All people - 15", label: "Aged 15", short: "15"}
+  - {id: a16_17, column: "All people - 16 - 17", label: "Aged 16–17", short: "16–17"}
+  - {id: a18_19, column: "All people - 18 - 19", label: "Aged 18–19", short: "18–19"}
+  - {id: a20_24, column: "All people - 20 - 24", label: "Aged 20–24", short: "20–24"}
+  - {id: a25_29, column: "All people - 25 - 29", label: "Aged 25–29", short: "25–29"}
+  - {id: a30_34, column: "All people - 30 - 34", label: "Aged 30–34", short: "30–34"}
+  - {id: a35_39, column: "All people - 35 - 39", label: "Aged 35–39", short: "35–39"}
+  - {id: a40_44, column: "All people - 40 - 44", label: "Aged 40–44", short: "40–44"}
+  - {id: a45_49, column: "All people - 45 - 49", label: "Aged 45–49", short: "45–49"}
+  - {id: a50_54, column: "All people - 50 - 54", label: "Aged 50–54", short: "50–54"}
+  - {id: a55_59, column: "All people - 55 - 59", label: "Aged 55–59", short: "55–59"}
+  - {id: a60_64, column: "All people - 60 - 64", label: "Aged 60–64", short: "60–64"}
+  - {id: a65_69, column: "All people - 65 - 69", label: "Aged 65–69", short: "65–69"}
+  - {id: a70_74, column: "All people - 70 - 74", label: "Aged 70–74", short: "70–74"}
+  - {id: a75_79, column: "All people - 75 - 79", label: "Aged 75–79", short: "75–79"}
+  - {id: a80_84, column: "All people - 80 - 84", label: "Aged 80–84", short: "80–84"}
+  - {id: a85p, column: "All people - 85 and over", label: "Aged 85 and over", short: "85+"}
+splits:
+  - group: sex
+    column: "{band} - {header}"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents:
+      a0_4: "0 - 4"
+      a5_9: "5 - 9"
+      a10_14: "10 - 14"
+      a15: "15"
+      a16_17: "16 - 17"
+      a18_19: "18 - 19"
+      a20_24: "20 - 24"
+      a25_29: "25 - 29"
+      a30_34: "30 - 34"
+      a35_39: "35 - 39"
+      a40_44: "40 - 44"
+      a45_49: "45 - 49"
+      a50_54: "50 - 54"
+      a55_59: "55 - 59"
+      a60_64: "60 - 64"
+      a65_69: "65 - 69"
+      a70_74: "70 - 74"
+      a75_79: "75 - 79"
+      a80_84: "80 - 84"
+      a85p: "85 and over"
+note: "Sex and age are two splits of the same population: each is a share of all people, so the sex shares add up to 100 and so do the age shares."

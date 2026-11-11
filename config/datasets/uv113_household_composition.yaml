@@ -1,0 +1,39 @@
+# UV113: household composition, counted in households. Nested "Total" columns are subtotals; the
+# shown rows are one person, one family all aged 66+, the three couple / lone parent family types and
+# other households, each broken down by its children. "One family household: Total" is not read.
+id: uv113_household_composition
+status: ready
+table: UV113
+title: Household composition (households)
+scheme: BuGn
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV113 - Household composition - Households.csv"
+  citation: "Scotland's Census 2022, UV113, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All households", total_column: "All households", unit: households}
+categories:
+  - {id: one_person, column: "One person household: Total", subtotal: true, label: One person household, short: One person}
+  - {id: one_66p, column: "One person household: Aged 66 and over", parent: one_person, label: "One person household, aged 66 and over", short: 66 and over}
+  - {id: one_under66, column: "One person household: Aged under 66", parent: one_person, label: "One person household, aged under 66", short: Under 66}
+  - {id: family_66p, column: "One family household: All aged 66 and over", label: "One family, all aged 66 and over", short: Family 66+}
+  - {id: married, column: "One family household: Married or civil partnership couple: Total", subtotal: true, label: Married or civil partnership couple family, short: Married couple}
+  - {id: married_none, column: "One family household: Married or civil partnership couple: No children", parent: married, label: "Married couple, no children", short: No children}
+  - {id: married_one, column: "One family household: Married or civil partnership couple: One dependent child", parent: married, label: "Married couple, one dependent child", short: 1 dep. child}
+  - {id: married_two, column: "One family household: Married or civil partnership couple: Two or more dependent children", parent: married, label: "Married couple, two or more dependent children", short: 2+ dep. children}
+  - {id: married_nondep, column: "One family household: Married or civil partnership couple: All children non-dependent", parent: married, label: "Married couple, all children non-dependent", short: Non-dep. children}
+  - {id: cohabiting, column: "One family household: Cohabiting couple: Total", subtotal: true, label: Cohabiting couple family, short: Cohabiting couple}
+  - {id: cohabiting_none, column: "One family household: Cohabiting couple: No children", parent: cohabiting, label: "Cohabiting couple, no children", short: No children}
+  - {id: cohabiting_one, column: "One family household: Cohabiting couple: One dependent child", parent: cohabiting, label: "Cohabiting couple, one dependent child", short: 1 dep. child}
+  - {id: cohabiting_two, column: "One family household: Cohabiting couple: Two or more dependent children", parent: cohabiting, label: "Cohabiting couple, two or more dependent children", short: 2+ dep. children}
+  - {id: cohabiting_nondep, column: "One family household: Cohabiting couple: All children non-dependent", parent: cohabiting, label: "Cohabiting couple, all children non-dependent", short: Non-dep. children}
+  - {id: lone_parent, column: "One family household: Lone parent family: Total", subtotal: true, label: Lone parent family, short: Lone parent}
+  - {id: lone_one, column: "One family household: Lone parent family: One dependent child", parent: lone_parent, label: "Lone parent, one dependent child", short: 1 dep. child}
+  - {id: lone_two, column: "One family household: Lone parent family: Two or more dependent children", parent: lone_parent, label: "Lone parent, two or more dependent children", short: 2+ dep. children}
+  - {id: lone_nondep, column: "One family household: Lone parent family: All children non-dependent", parent: lone_parent, label: "Lone parent, all children non-dependent", short: Non-dep. children}
+  - {id: other, column: "Other household types: Total", subtotal: true, label: Other household types, short: Other}
+  - {id: other_one, column: "Other household types: One dependent child", parent: other, label: "Other household, one dependent child", short: 1 dep. child}
+  - {id: other_two, column: "Other household types: Two or more dependent children", parent: other, label: "Other household, two or more dependent children", short: 2+ dep. children}
+  - {id: other_students, column: "Other household types: All full-time students", parent: other, label: "Other household, all full-time students", short: Students}
+  - {id: other_66p, column: "Other household types: All aged 66 and over", parent: other, label: "Other household, all aged 66 and over", short: All 66+}
+  - {id: other_other, column: "Other household types: Other", parent: other, label: "Other household, other", short: Other}
+  # --- across the household types ---
+  - {id: dependent_children, of: [married_one, married_two, cohabiting_one, cohabiting_two, lone_one, lone_two, other_one, other_two], label: Households with dependent children, short: With dep. children}

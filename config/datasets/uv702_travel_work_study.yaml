@@ -1,0 +1,38 @@
+# UV702: method of travel to work or study, by household: how many people in the household
+# work or study, and how they travel. The three "- Total" columns are subtotals of the travel
+# combinations under them. `all_drive` and `all_home` add up matching columns across them.
+id: uv702_travel_work_study
+status: ready
+table: UV702
+title: Travel to work or study (households)
+scheme: Greens
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV702 - Method of travel to work or study.csv"
+  citation: "Scotland's Census 2022, UV702, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: none, column: "No person working or studying in the household", label: No one working or studying, short: None}
+  - {id: one, column: "One person working or studying in the household - Total", subtotal: true, label: One person working or studying, short: One person}
+  - {id: one_driving, column: "One person working or studying in the household - Driving a car or van", parent: one, label: "One person, driving a car or van", short: Driving}
+  - {id: one_other, column: "One person working or studying in the household - Other method of travel to place of work or study", parent: one, label: "One person, other method of travel", short: Other method}
+  - {id: one_home, column: "One person working or studying in the household - Works or studies at home", parent: one, label: "One person, works or studies at home", short: At home}
+  - {id: two, column: "Two people working or studying in the household - Total", subtotal: true, label: Two people working or studying, short: Two people}
+  - {id: two_driving, column: "Two people working or studying in the household - Both driving cars or vans", parent: two, label: "Two people, both driving", short: Both driving}
+  - {id: two_other, column: "Two people working or studying in the household - Both other method of travel to place of work or study", parent: two, label: "Two people, both other method of travel", short: Both other}
+  - {id: two_home, column: "Two people working or studying in the household - Both working or studying at home", parent: two, label: "Two people, both at home", short: Both at home}
+  - {id: two_driving_other, column: "Two people working or studying in the household - One driving a car or van, one other method", parent: two, label: "Two people, one driving and one other method", short: Driving + other}
+  - {id: two_driving_home, column: "Two people working or studying in the household - One driving a car or van, one working at home", parent: two, label: "Two people, one driving and one at home", short: Driving + home}
+  - {id: two_other_home, column: "Two people working or studying in the household - One other method, one working at home", parent: two, label: "Two people, one other method and one at home", short: Other + home}
+  - {id: three, column: "Three or more people working or studying in the household - Total", subtotal: true, label: Three or more people working or studying, short: Three or more}
+  - {id: three_driving, column: "Three or more people working or studying in the household - All driving cars or vans", parent: three, label: "Three or more people, all driving", short: All driving}
+  - {id: three_other, column: "Three or more people working or studying in the household - All other method of travel to work", parent: three, label: "Three or more people, all other method of travel", short: All other}
+  - {id: three_home, column: "Three or more people working or studying in the household - All working at home", parent: three, label: "Three or more people, all at home", short: All at home}
+  - {id: three_driving_other, column: "Three or more people working or studying in the household - Mixture of driving a car or van and other method", parent: three, label: "Three or more people, driving and other method", short: Driving + other}
+  - {id: three_driving_home, column: "Three or more people working or studying in the household - Mixture of driving a car or van and working at home", parent: three, label: "Three or more people, driving and at home", short: Driving + home}
+  - {id: three_other_home, column: "Three or more people working or studying in the household - Mixture of other method and working at home", parent: three, label: "Three or more people, other method and at home", short: Other + home}
+  - {id: three_mixed, column: "Three or more people working or studying in the household - Mixture of driving a car or van, other and working at home", parent: three, label: "Three or more people, driving, other method and at home", short: All three}
+  # --- across household sizes ---
+  - {id: all_drive, of: [one_driving, two_driving, three_driving], label: Everyone working or studying drives, short: All drive}
+  - {id: all_home, of: [one_home, two_home, three_home], label: Everyone working or studying does so at home, short: All at home}
+  - {id: all_other, of: [one_other, two_other, three_other], label: Everyone working or studying uses another method, short: All other method}
+note: "Counts households, not people. 'Other method' is any method other than driving a car or van (including being a passenger, public transport, walking and cycling)."

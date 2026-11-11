@@ -1,0 +1,749 @@
+<title>Census Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* Layout: category tabs on top, indicator list left, map centre, graphs right (v4git skeleton, three columns). */
+:root {
+  --blue: #0065bd; --blue-dark: #00437e; --yellow: #fdd522;
+  --ink: #1a1a1a; --slate: #333e48; --muted: #5e5e5e;
+  --line: #b3b3b3; --hair: #ebebeb; --paper: #f8f8f8; --panel: #ffffff;
+  --red: #d32205; --orange: #e87722; --green: #1a7032; --teal: #28a197; --purple: #741e6d;
+  --ctx: #e2e2e2; --font: 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --mono: 'Roboto Mono', ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; font-family: var(--font); background: var(--paper); color: var(--ink); display: flex; flex-direction: column; overflow: hidden; }
+button { font-family: var(--font); }
+
+#topnav { min-height: 56px; background: var(--blue); color: #fff; display: flex; align-items: stretch; flex-shrink: 0; user-select: none; }
+#logo { padding: 0 22px; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; border-right: 1px solid var(--blue-dark); white-space: nowrap; }
+#cats { display: flex; flex: 1; min-width: 0; overflow-x: auto; }
+.cat { padding: 0 20px; font-size: .92rem; border: none; border-right: 1px solid var(--blue-dark); background: transparent; color: #fff; cursor: pointer; white-space: nowrap; font-weight: 400; }
+.cat:hover { background: var(--blue-dark); }
+.cat[aria-selected="true"] { background: var(--yellow); color: var(--ink); font-weight: 700; }
+.cat:focus-visible, .geo-btn:focus-visible, .item:focus-visible, .crumb:focus-visible, .tool:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+#navright { display: flex; align-items: center; gap: 10px; padding: 0 16px; border-left: 1px solid var(--blue-dark); }
+.badge { font-size: .72rem; color: #dbe9f6; max-width: 190px; line-height: 1.25; }
+.tool { font-size: .78rem; padding: 5px 10px; border-radius: 3px; border: 1px solid #7fb0dc; background: transparent; color: #fff; cursor: pointer; white-space: nowrap; }
+.tool:hover, .tool[aria-pressed="true"] { background: #fff; color: var(--blue); }
+
+#body { display: flex; flex: 1; min-height: 0; }
+#sidebar { width: 248px; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; flex-shrink: 0; min-height: 0; }
+.sbh { padding: 10px 14px 7px; font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--hair); }
+.geo { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--hair); background: #fafafa; }
+.geo-btn { flex: 1; padding: 5px 6px; font-size: .78rem; cursor: pointer; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--slate); }
+.geo-btn:hover { background: var(--hair); border-color: var(--blue); color: var(--blue); }
+.geo-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+#sbList { flex: 1; overflow-y: auto; }
+.item { display: block; width: 100%; text-align: left; padding: 9px 14px; font-size: .82rem; color: var(--ink); cursor: pointer; border: none; border-bottom: 1px solid var(--hair); background: #fff; line-height: 1.35; }
+.item small { display: block; color: var(--muted); font-size: .72rem; margin-top: 1px; }
+.item:hover { background: var(--paper); color: var(--blue); }
+.item.active { background: var(--hair); color: var(--blue); font-weight: 700; border-left: 3px solid var(--yellow); padding-left: 11px; }
+.item.active small { font-weight: 400; }
+#sbFoot { padding: 10px 14px; font-size: .72rem; color: var(--muted); border-top: 1px solid var(--hair); line-height: 1.4; }
+
+#mapwrap { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; position: relative; }
+#crumbbar { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-bottom: 1px solid var(--hair); background: #fff; min-height: 38px; font-size: .82rem; flex-wrap: wrap; }
+#back { padding: 4px 10px; font-size: .78rem; cursor: pointer; background: #fff; border: 1px solid var(--line); border-radius: 3px; color: var(--slate); }
+#back:hover { background: var(--hair); }
+.crumb { background: none; border: none; padding: 2px 3px; color: var(--blue); cursor: pointer; font-size: .82rem; }
+.crumb:hover { text-decoration: underline; }
+.crumb.here { color: var(--ink); font-weight: 700; cursor: default; text-decoration: none; }
+.sep { color: var(--muted); }
+#mapbox { flex: 1; position: relative; min-height: 0; background: #fff; }
+#map { width: 100%; height: 100%; display: block; }
+#map path { vector-effect: non-scaling-stroke; }
+.f { stroke: #fff; stroke-width: .6; cursor: pointer; }
+.ctx { fill: var(--ctx); stroke: #fff; stroke-width: .6; cursor: pointer; }
+.ctx:hover { fill: #d2d2d2; }
+.ov { fill: none; pointer-events: none; }
+#legend { position: absolute; left: 12px; bottom: 12px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 3px; padding: 8px 10px; font-size: .74rem; min-width: 150px; }
+#legend b { display: block; font-size: .76rem; margin-bottom: 1px; }
+#legend .u { color: var(--muted); margin-bottom: 5px; display: block; }
+#legend .row { display: flex; align-items: center; gap: 7px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+#legend i { width: 16px; height: 10px; display: inline-block; border: 1px solid rgba(0,0,0,.15); }
+#hint { position: absolute; right: 12px; bottom: 12px; font-size: .72rem; color: var(--muted); background: rgba(255,255,255,.9); padding: 4px 8px; border-radius: 3px; border: 1px solid var(--hair); max-width: 46%; text-align: right; }
+#notice { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--slate); color: #fff; font-size: .78rem; padding: 7px 12px; border-radius: 3px; max-width: 80%; }
+#yaml { position: absolute; left: 0; right: 0; bottom: 0; max-height: 58%; background: #20262c; color: #e8edf2; border-top: 3px solid var(--yellow); display: flex; flex-direction: column; z-index: 5; }
+#yaml header { display: flex; justify-content: space-between; align-items: center; padding: 7px 14px; font-size: .74rem; color: #aab6c2; border-bottom: 1px solid #38424c; gap: 12px; }
+#yaml pre { margin: 0; padding: 10px 14px; overflow: auto; font: 12px/1.5 var(--mono); tab-size: 2; }
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--slate); color: #fff; font-size: .76rem; padding: 5px 8px; border-radius: 3px; line-height: 1.35; max-width: 220px; }
+#tip span { color: #cfd8e0; }
+
+#panel { width: 400px; background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; flex-shrink: 0; min-height: 0; }
+.pin { padding: 14px 18px 24px; }
+.ptitle { font-size: 1.15rem; font-weight: 700; margin: 0; }
+.psub { font-size: .76rem; color: var(--muted); margin: 2px 0 12px; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.card { border: 1px solid var(--hair); background: #fafafa; padding: 8px 10px; border-radius: 3px; min-width: 0; }
+.card .k { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.card .v { font-size: 1.15rem; font-weight: 700; color: var(--blue-dark); font-variant-numeric: tabular-nums; }
+.card .d { font-size: .7rem; color: var(--muted); }
+.desc { font-size: .82rem; line-height: 1.5; color: var(--slate); margin: 0 0 14px; }
+.pnl { border-top: 1px solid var(--hair); padding-top: 12px; margin-top: 4px; }
+.pnl h3 { font-size: .86rem; margin: 0 0 4px; }
+.leg { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .72rem; color: var(--slate); margin-bottom: 4px; }
+.leg span { display: inline-flex; align-items: center; gap: 5px; }
+.leg svg { width: 22px; height: 8px; }
+.pnl svg.ch { width: 100%; display: block; overflow: visible; }
+.ch text { font-family: var(--font); }
+.foot { font-size: .7rem; color: var(--muted); margin-top: 14px; line-height: 1.4; }
+.dot { cursor: pointer; }
+
+#crumbbar .grow { flex: 1; }
+.tool2 { font-size: .78rem; padding: 4px 10px; border-radius: 3px; border: 1px solid var(--line); background: #fff; color: var(--slate); cursor: pointer; white-space: nowrap; }
+.tool2:hover { background: var(--hair); border-color: var(--blue); color: var(--blue); }
+.tool2[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 700; }
+.tool2.sm { font-size: .74rem; padding: 3px 8px; margin-top: 6px; }
+.tool2:focus-visible, .seg button:focus-visible, #selSel:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.chip.base { display: inline-flex; align-items: center; gap: 6px; font-size: .76rem; background: #f1e6f0; color: var(--purple); border: 1px solid #d9bfd6; border-radius: 12px; padding: 2px 4px 2px 10px; }
+.chip.base button { border: none; background: none; color: var(--purple); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 5px; }
+#selbox { position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,.95); border: 1px solid var(--line); border-radius: 3px; padding: 6px 8px; font-size: .78rem; display: flex; align-items: center; gap: 7px; max-width: calc(100% - 24px); }
+#selbox label { font-weight: 700; color: var(--muted); }
+#selSel { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink); max-width: 230px; }
+.seg { display: flex; margin-top: 7px; }
+.seg button { flex: 1; font-size: .72rem; padding: 3px 6px; border: 1px solid var(--line); background: #fff; color: var(--slate); cursor: pointer; }
+.seg button:first-child { border-radius: 3px 0 0 3px; } .seg button:last-child { border-radius: 0 3px 3px 0; border-left: none; }
+.seg button[aria-pressed="true"] { background: var(--blue); color: #fff; border-color: var(--blue); }
+.basebox { font-size: .78rem; line-height: 1.45; color: var(--slate); background: #f6eff6; border: 1px solid #e3d0e1; border-radius: 3px; padding: 8px 10px; margin: 0 0 12px; }
+.basebox b { display: block; color: var(--purple); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: .78rem; margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+table.cmp th { text-align: right; font-size: .68rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; padding: 3px 4px; border-bottom: 1px solid var(--line); }
+table.cmp th:first-child, table.cmp td:first-child { text-align: left; }
+table.cmp td { text-align: right; padding: 5px 4px; border-bottom: 1px solid var(--hair); }
+table.cmp td:first-child { white-space: nowrap; }
+table.cmp i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; border: 1px solid #1a1a1a; }
+.crow { cursor: pointer; } .crow:hover rect:first-child { fill: #f3f3f3; }
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  #body { flex-direction: column; flex: none; }
+  #sidebar { width: 100%; max-height: 210px; border-right: none; border-bottom: 1px solid var(--line); }
+  #mapwrap { height: 62vh; flex: none; }
+  #panel { width: 100%; border-left: none; border-top: 1px solid var(--line); overflow: visible; }
+  .pin { padding-inline: 16px; }
+  #navright .badge { display: none; }
+  #logo { padding: 0 14px; }
+  #hint { display: none; }
+}
+</style>
+
+<header id="topnav">
+  <div id="logo">Census Explorer</div>
+  <nav id="cats" role="tablist" aria-label="Census topics"></nav>
+  <div id="navright">
+    <span class="badge">Mockup. Only population and density are real.</span>
+    <button class="tool" id="yamlBtn" aria-pressed="false">Spec (YAML)</button>
+  </div>
+</header>
+
+<div id="body">
+  <aside id="sidebar" aria-label="Indicators">
+    <div class="sbh">Map view</div>
+    <div class="geo">
+      <button class="geo-btn active" id="gDrill">Drill down</button>
+      <button class="geo-btn" id="gDz">Data zones</button>
+    </div>
+    <div class="sbh" id="sbCat">Indicators</div>
+    <div id="sbList"></div>
+    <div id="sbFoot">Click a council area to zoom to its localities. Click a locality or a dot in a chart to select it. Click blank map to deselect. Esc steps back.</div>
+  </aside>
+
+  <main id="mapwrap">
+    <div id="crumbbar"></div>
+    <div id="mapbox">
+      <svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of Scotland"></svg>
+      <div id="selbox" hidden></div>
+      <div id="legend"></div>
+      <div id="hint"></div>
+      <div id="notice" hidden></div>
+      <section id="yaml" hidden>
+        <header><span id="yamlHead"></span><button class="tool" id="yamlClose">Close</button></header>
+        <pre id="yamlPre"></pre>
+      </section>
+    </div>
+  </main>
+
+  <aside id="panel" aria-live="polite"></aside>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const GEO = /*GEO*/null;
+
+/* ---------- The spec. In the build this is config/explorer.yaml; the YAML drawer prints this same object. ---------- */
+const SPEC = {
+  compare: { max_items: 4, same_level_only: true },
+  baseline: { modes: ['relative', 'difference'], scheme: 'diverging', levels: ['la', 'locality', 'oa'] },
+  categories: [
+    { id: 'population', label: 'Population', indicators: [
+      { id: 'median_age', label: 'Median age', metric: 'median_age', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Median age by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'age_structure', label: 'Age structure', metric: 'age_75p', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile' },
+        panels: [
+          { type: 'profile', title: 'Population by age band (%)', series: ['age_0_15','age_16_24','age_25_44','age_45_64','age_65_74','age_75p'], reference_lines: ['national','la'] },
+          { type: 'ranked', title: 'Aged 75 and over (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'population', label: 'Total population', metric: 'pop', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Residents by {children}', mark: 'bar', scale: 'linear', reference_lines: [] }] },
+      { id: 'density', label: 'Population density', metric: 'density', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'People per km² by {children}', mark: 'dot', scale: 'log', reference_lines: ['national','la'] }] }
+    ]},
+    { id: 'households', label: 'Households & housing', indicators: [
+      { id: 'tenure', label: 'Tenure', metric: 'ten_social', levels: ['la','locality'],
+        map: { scheme: 'Oranges', classes: 5, method: 'quantile' },
+        panels: [
+          { type: 'profile', title: 'Households by tenure (%)', series: ['ten_own_outright','ten_mortgage','ten_social','ten_private','ten_other'], reference_lines: ['national','la'] },
+          { type: 'ranked', title: 'Social rented (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'hh_size', label: 'Average household size', metric: 'hh_size', levels: ['la','locality'],
+        map: { scheme: 'Greens', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'People per household by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] }
+    ]},
+    { id: 'health', label: 'Health', indicators: [
+      { id: 'health_good', label: 'Good or very good health', metric: 'health_good', levels: ['la','locality'],
+        map: { scheme: 'Greens', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Good or very good health (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'ltc', label: 'Long-term condition', metric: 'ltc', levels: ['la','locality'],
+        map: { scheme: 'Purples', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'One or more long-term conditions (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] }
+    ]},
+    { id: 'education', label: 'Education', indicators: [
+      { id: 'no_quals', label: 'No qualifications', metric: 'no_quals', levels: ['la','locality'],
+        map: { scheme: 'Oranges', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'No qualifications (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'degree', label: 'Degree level or above', metric: 'degree', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Degree level or above (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] }
+    ]},
+    { id: 'labour', label: 'Labour market', indicators: [
+      { id: 'econ_active', label: 'Economic activity rate', metric: 'econ_active', levels: ['la','locality'],
+        map: { scheme: 'Greens', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Economically active, aged 16+ (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'industry', label: 'Industry of employment', metric: 'ind_health', levels: ['la','locality'],
+        map: { scheme: 'Blues', classes: 5, method: 'quantile', selector: 'category' },
+        panels: [{ type: 'composition', title: 'Employed people by industry (%)', series: ['ind_health','ind_retail','ind_education','ind_public','ind_construction','ind_other'], reference_lines: ['national','la'] }] }
+    ]},
+    { id: 'transport', label: 'Travel', indicators: [
+      { id: 'travel_work', label: 'Travel to work', metric: 'tw_cycle', levels: ['la','locality'],
+        map: { scheme: 'Greens', classes: 5, method: 'quantile' },
+        panels: [
+          { type: 'profile', title: 'Usual way of travelling to work (%)', series: ['tw_car','tw_pt','tw_walk','tw_cycle','tw_home'], reference_lines: ['national','la'] },
+          { type: 'ranked', title: 'Cycle to work (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] },
+      { id: 'no_car', label: 'No car or van', metric: 'no_car', levels: ['la','locality'],
+        map: { scheme: 'Oranges', classes: 5, method: 'quantile' },
+        panels: [{ type: 'ranked', title: 'Households with no car or van (%) by {children}', mark: 'dot', scale: 'linear', reference_lines: ['national','la'] }] }
+    ]}
+  ]
+};
+
+/* ---------- Metric definitions (in the build: config/metrics.yaml). base/urban/spread only exist to fake plausible values. ---------- */
+const M = {
+  pop:        { label: 'Population', unit: 'people', dec: 0, real: true },
+  density:    { label: 'Population density', unit: 'people per km²', dec: 0, real: true },
+  median_age: { label: 'Median age', unit: 'years', dec: 1, base: 42.5, urban: -3.4, spread: 1.5 },
+  age_0_15:   { label: 'Aged 0–15', short: '0–15', unit: '%', dec: 1, base: 16.4, urban: 0.6, spread: 0.7, share: 1 },
+  age_16_24:  { label: 'Aged 16–24', short: '16–24', unit: '%', dec: 1, base: 9.4, urban: 2.4, spread: 0.7, share: 1 },
+  age_25_44:  { label: 'Aged 25–44', short: '25–44', unit: '%', dec: 1, base: 25.2, urban: 4.0, spread: 1.0, share: 1 },
+  age_45_64:  { label: 'Aged 45–64', short: '45–64', unit: '%', dec: 1, base: 27.4, urban: -3.0, spread: 0.9, share: 1 },
+  age_65_74:  { label: 'Aged 65–74', short: '65–74', unit: '%', dec: 1, base: 11.9, urban: -2.6, spread: 0.8, share: 1 },
+  age_75p:    { label: 'Aged 75 and over', short: '75+', unit: '%', dec: 1, base: 9.7, urban: -2.0, spread: 0.8, share: 1 },
+  hh_size:    { label: 'Average household size', unit: 'people', dec: 2, base: 2.2, urban: -0.15, spread: 0.07 },
+  ten_own_outright: { label: 'Owned outright', short: 'Owned', unit: '%', dec: 1, base: 31, urban: -9, spread: 3, share: 1 },
+  ten_mortgage:     { label: 'Owned with mortgage', short: 'Mortgage', unit: '%', dec: 1, base: 29, urban: -4, spread: 3, share: 1 },
+  ten_social:       { label: 'Social rented', short: 'Social', unit: '%', dec: 1, base: 22, urban: 7, spread: 3, share: 1 },
+  ten_private:      { label: 'Private rented', short: 'Private', unit: '%', dec: 1, base: 14, urban: 7, spread: 2.5, share: 1 },
+  ten_other:        { label: 'Other', short: 'Other', unit: '%', dec: 1, base: 4, urban: 0, spread: 1.2, share: 1 },
+  health_good: { label: 'Good or very good health', unit: '%', dec: 1, base: 81.5, urban: -2.5, spread: 1.2 },
+  ltc:         { label: 'Long-term condition', unit: '%', dec: 1, base: 33, urban: -1.5, spread: 1.8 },
+  no_quals:    { label: 'No qualifications', unit: '%', dec: 1, base: 16, urban: 1.5, spread: 2.2 },
+  degree:      { label: 'Degree level or above', unit: '%', dec: 1, base: 33, urban: 7, spread: 3 },
+  econ_active: { label: 'Economic activity rate', unit: '%', dec: 1, base: 60.5, urban: 3, spread: 2 },
+  ind_health:       { label: 'Health and social work', short: 'Health', unit: '%', dec: 1, base: 17, urban: -0.5, spread: 2, share: 1 },
+  ind_retail:       { label: 'Retail and wholesale', short: 'Retail', unit: '%', dec: 1, base: 13.5, urban: -0.5, spread: 1.2, share: 1 },
+  ind_education:    { label: 'Education', short: 'Educ.', unit: '%', dec: 1, base: 8, urban: 0.5, spread: 1, share: 1 },
+  ind_public:       { label: 'Public administration', short: 'Public', unit: '%', dec: 1, base: 7, urban: 1, spread: 1.3, share: 1 },
+  ind_construction: { label: 'Construction', short: 'Constr.', unit: '%', dec: 1, base: 8, urban: -2, spread: 1.2, share: 1 },
+  ind_other:        { label: 'All other industries', short: 'Other', unit: '%', dec: 1, base: 46.5, urban: 1.5, spread: 3, share: 1 },
+  tw_car:   { label: 'Car or van', short: 'Car/van', unit: '%', dec: 1, base: 56, urban: -15, spread: 4, share: 1 },
+  tw_pt:    { label: 'Public transport', short: 'Public', unit: '%', dec: 1, base: 10, urban: 7, spread: 2, share: 1 },
+  tw_walk:  { label: 'On foot', short: 'Walk', unit: '%', dec: 1, base: 11, urban: 4, spread: 2.5, share: 1 },
+  tw_cycle: { label: 'Cycle', short: 'Cycle', unit: '%', dec: 1, base: 2, urban: 1.8, spread: 0.7, share: 1 },
+  tw_home:  { label: 'Work mainly from home', short: 'Home', unit: '%', dec: 1, base: 21, urban: 2, spread: 3, share: 1 },
+  no_car:   { label: 'No car or van', unit: '%', dec: 1, base: 24, urban: 15, spread: 3.5 }
+};
+const SHARE_GROUPS = [
+  ['age_0_15','age_16_24','age_25_44','age_45_64','age_65_74','age_75p'],
+  ['ten_own_outright','ten_mortgage','ten_social','ten_private','ten_other'],
+  ['ind_health','ind_retail','ind_education','ind_public','ind_construction','ind_other'],
+  ['tw_car','tw_pt','tw_walk','tw_cycle','tw_home']
+];
+const RAMPS = {
+  Blues:   ['#eff3ff','#bdd7e7','#6baed6','#3182bd','#08519c'],
+  Greens:  ['#edf8e9','#bae4b3','#74c476','#31a354','#006d2c'],
+  Oranges: ['#feedde','#fdbe85','#fd8d3c','#e6550d','#a63603'],
+  Purples: ['#f2f0f7','#cbc9e2','#9e9ac8','#756bb1','#54278f']
+};
+
+/* ---------- Lookups ---------- */
+const $ = (s) => document.querySelector(s);
+const LA = GEO.la, LAS = Object.fromEntries(LA.map(f => [f.c, f]));
+const LOCS = {}, LOC_PARENT = {};
+for (const [la, arr] of Object.entries(GEO.loc)) for (const f of arr) { LOCS[f.c] = f; LOC_PARENT[f.c] = la; }
+const ALL_LOC = Object.values(LOCS);
+const FEAT = (c) => LAS[c] || LOCS[c];
+const fmt = (v, d = 0) => v == null || isNaN(v) ? '–' : Number(v).toLocaleString('en-GB', { minimumFractionDigits: d, maximumFractionDigits: d });
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- Fake but stable values ---------- */
+function h32(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function gauss(s) { const u = (h32(s + 'a') + 1) / 4294967297, v = (h32(s + 'b') + 1) / 4294967297; return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const dens = (f) => f.pop / Math.max(f.a, 0.05);
+const urban = (f) => Math.max(-1.2, Math.min(1.3, (Math.log10(Math.max(dens(f), 1)) - 2) / 1.2));
+const clampPct = (m, v) => M[m].unit === '%' ? Math.max(0.3, Math.min(99.5, v)) : v;
+const rawCache = {};
+function raw(m, f) {
+  const k = m + '|' + f.c; if (k in rawCache) return rawCache[k];
+  const d = M[m]; let v;
+  if (m === 'pop') v = f.pop;
+  else if (m === 'density') v = dens(f);
+  else if (LAS[f.c]) v = d.base + d.urban * urban(f) + d.spread * gauss(k);
+  else {
+    const la = LAS[LOC_PARENT[f.c]], sd = d.spread * 0.9 * (1 + 30 / Math.sqrt(Math.max(f.pop, 30)));
+    v = raw(m, la) + d.urban * (urban(f) - urban(la)) * 0.6 + sd * gauss(k);
+  }
+  return rawCache[k] = clampPct(m, v);
+}
+function val(m, f) {
+  const d = M[m];
+  if (!d.share) return raw(m, f);
+  const g = SHARE_GROUPS.find(a => a.includes(m)), tot = g.reduce((s, x) => s + raw(x, f), 0);
+  return raw(m, f) / tot * 100;
+}
+const natCache = {};
+function national(m) {
+  if (m in natCache) return natCache[m];
+  const P = LA.reduce((s, f) => s + f.pop, 0);
+  if (m === 'pop') return natCache[m] = P;
+  if (m === 'density') return natCache[m] = P / LA.reduce((s, f) => s + f.a, 0);
+  return natCache[m] = LA.reduce((s, f) => s + val(m, f) * f.pop, 0) / P;
+}
+const valueFor = (m, f) => (m === 'pop' || m === 'density') ? raw(m, f) : val(m, f);
+
+/* ---------- State ---------- */
+const S = { cat: 0, ind: 0, la: null, loc: null, sel: {}, cmpOn: false, cmp: [], base: null, diff: 'rel' };
+const CMP = ['#d32205', '#1a7032', '#e87722', '#28a197'];
+const DIV = ['#e87722', '#f5b98a', '#f1f1f1', '#9cc2e4', '#0065bd'];
+const IND = () => SPEC.categories[S.cat].indicators[S.ind];
+const curMetric = () => { const i = IND(); return (i.map.selector && S.sel[i.id]) || i.metric; };
+const VIEW_LEVEL = () => S.la ? 'locality' : 'la';
+const viewFeats = () => S.la ? GEO.loc[S.la] : LA;
+const levelWord = (plural) => S.la ? (plural ? 'localities' : 'locality') : (plural ? 'council areas' : 'council area');
+function compositionSeries(ind) { const p = ind.panels.find(x => x.type === 'composition'); return p ? p.series : null; }
+
+/* The features the right panel is about, with their chart colours. */
+function focusList() {
+  if (S.cmpOn) return S.cmp.map((c, i) => ({ f: FEAT(c), col: CMP[i] }));
+  const f = S.loc ? LOCS[S.loc] : S.la ? LAS[S.la] : null;
+  return f ? [{ f, col: COL.dot, single: true }] : [];
+}
+
+/* ---------- Top nav and sidebar ---------- */
+function renderNav() {
+  $('#cats').innerHTML = SPEC.categories.map((c, i) =>
+    `<button class="cat" role="tab" aria-selected="${i === S.cat}" data-cat="${i}">${esc(c.label)}</button>`).join('');
+}
+function renderSidebar() {
+  const c = SPEC.categories[S.cat];
+  $('#sbCat').textContent = c.label;
+  $('#sbList').innerHTML = c.indicators.map((x, i) => {
+    const m = M[x.metric];
+    const sub = x.map.selector ? 'choose a category on the map' : m.label + (m.unit ? ' · ' + m.unit : '');
+    return `<button class="item${i === S.ind ? ' active' : ''}" data-ind="${i}">${esc(x.label)}<small>${esc(sub)}</small></button>`;
+  }).join('');
+}
+
+/* ---------- Map ---------- */
+const svg = $('#map'), NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+const gLA = mk('g', {}), gLoc = mk('g', {});
+const ovLA = mk('path', { class: 'ov', stroke: '#0065bd', 'stroke-width': 1.8 });
+const gCmp = mk('g', {});
+const ovBase = mk('path', { class: 'ov', stroke: '#741e6d', 'stroke-width': 3.2 });
+const ovSel = mk('path', { class: 'ov', stroke: '#1a1a1a', 'stroke-width': 2.6 });
+const ovSel2 = mk('path', { class: 'ov', stroke: '#fdd522', 'stroke-width': 1.2 });
+const ovHl = mk('path', { class: 'ov', stroke: '#1a1a1a', 'stroke-width': 1.6 });
+const laEls = {};
+for (const f of LA) laEls[f.c] = mk('path', { d: f.d, 'data-c': f.c, class: 'f' }, gLA);
+let vb = { x: -4, y: -4, w: GEO.W + 8, h: GEO.H + 8 };
+const setVB = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+setVB();
+let anim = 0;
+function zoomTo(b) {
+  const pad = b ? Math.max(b[2] - b[0], b[3] - b[1]) * 0.1 + 2 : 4;
+  const t = b ? { x: b[0] - pad, y: b[1] - pad, w: b[2] - b[0] + 2 * pad, h: b[3] - b[1] + 2 * pad } : { x: -4, y: -4, w: GEO.W + 8, h: GEO.H + 8 };
+  const s = { ...vb }, t0 = performance.now(), D = 520; cancelAnimationFrame(anim);
+  const ease = (p) => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+  const step = (now) => { const p = Math.min(1, (now - t0) / D), e = ease(p);
+    for (const k of ['x', 'y', 'w', 'h']) vb[k] = s[k] + (t[k] - s[k]) * e; setVB(); if (p < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
+}
+
+const brkCache = {};
+function breaks(m, level, classes) {
+  const k = m + level + classes; if (brkCache[k]) return brkCache[k];
+  const vs = (level === 'la' ? LA : ALL_LOC).map(f => valueFor(m, f)).sort((a, b) => a - b);
+  const out = []; for (let i = 1; i < classes; i++) out.push(vs[Math.floor(vs.length * i / classes)]);
+  return brkCache[k] = out;
+}
+const klass = (v, br) => { let i = 0; while (i < br.length && v >= br[i]) i++; return i; };
+
+/* Baseline: difference of every area in view to the baseline area. */
+function diffOf(m, f) {
+  const b = valueFor(m, FEAT(S.base)), v = valueFor(m, f);
+  return S.diff === 'rel' ? (b ? (v / b - 1) * 100 : NaN) : v - b;
+}
+function baseBreaks(m) {
+  const ds = viewFeats().filter(f => f.c !== S.base).map(f => diffOf(m, f)).filter(isFinite);
+  const mean = ds.reduce((a, b) => a + b, 0) / ds.length, sd = Math.sqrt(ds.reduce((a, b) => a + (b - mean) ** 2, 0) / ds.length) || 1;
+  return [-sd, -0.25 * sd, 0.25 * sd, sd];
+}
+
+function paintMap() {
+  const ind = IND(), m = curMetric(), lvl = VIEW_LEVEL(), ramp = RAMPS[ind.map.scheme], br = breaks(m, lvl, ind.map.classes);
+  const baseOn = !!S.base, bb = baseOn ? baseBreaks(m) : null;
+  const fillFor = (f) => {
+    if (!baseOn) return ramp[klass(valueFor(m, f), lvl === 'la' ? breaks(m, 'la', ind.map.classes) : br)];
+    if (f.c === S.base) return '#ffffff';
+    const d = diffOf(m, f); return isFinite(d) ? DIV[klass(d, bb)] : '#cfcfcf';
+  };
+  for (const f of LA) {
+    const el = laEls[f.c];
+    if (!S.la) { el.setAttribute('class', 'f'); el.setAttribute('fill', fillFor(f)); }
+    else if (f.c === S.la) { el.setAttribute('class', 'f'); el.setAttribute('fill', '#f1f1f1'); }
+    else { el.setAttribute('class', 'ctx'); el.removeAttribute('fill'); }
+  }
+  gLoc.innerHTML = '';
+  if (S.la) for (const f of GEO.loc[S.la]) {
+    const e = mk('path', { d: f.d, 'data-c': f.c, class: 'f', fill: fillFor(f) }, gLoc);
+    e.style.strokeWidth = '.4';
+  }
+  ovLA.setAttribute('d', S.la ? LAS[S.la].d : '');
+  gCmp.innerHTML = '';
+  if (S.cmpOn) S.cmp.forEach((c, i) => mk('path', { d: FEAT(c).d, class: 'ov', stroke: CMP[i], 'stroke-width': 3.4 }, gCmp));
+  const sel = !S.cmpOn && S.loc ? LOCS[S.loc] : null;
+  ovSel.setAttribute('d', sel ? sel.d : ''); ovSel2.setAttribute('d', sel ? sel.d : '');
+  ovBase.setAttribute('d', baseOn ? FEAT(S.base).d : '');
+  baseOn ? renderBaseLegend(m, bb) : renderLegend(ramp, br, m);
+  renderSelector();
+}
+function renderLegend(ramp, br, m) {
+  const d = M[m], lines = [];
+  const vs = (S.la ? ALL_LOC : LA).map(f => valueFor(m, f)), mn = Math.min(...vs), mx = Math.max(...vs);
+  const edges = [mn, ...br, mx];
+  for (let i = 0; i < ramp.length; i++) lines.push(`<div class="row"><i style="background:${ramp[i]}"></i>${fmt(edges[i], d.dec)} – ${fmt(edges[i + 1], d.dec)}</div>`);
+  $('#legend').innerHTML = `<b>${esc(d.label)}</b><span class="u">${esc(d.unit)} · quintiles of all ${S.la ? '656 localities' : '32 council areas'}</span>${lines.join('')}`;
+  $('#hint').textContent = S.cmpOn ? 'Compare is on: click areas to add or remove them. Blank map clears.' : S.la ? 'Pale areas inside the outline are outside any locality. Click blank map to deselect.' : 'Click a council area to zoom to its localities.';
+}
+function renderBaseLegend(m, bb) {
+  const d = M[m], u = S.diff === 'rel' ? '%' : (d.unit === '%' ? ' pts' : ' ' + d.unit), dec = S.diff === 'rel' ? 0 : Math.min(d.dec, 1);
+  const f = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + fmt(Math.abs(v), dec) + u;
+  const rows = [
+    ['less than ' + f(bb[0]).replace('−', '−'), DIV[0]], [f(bb[0]) + ' to ' + f(bb[1]), DIV[1]],
+    ['within ' + f(bb[1]).replace(/^−/, '±') , DIV[2]], [f(bb[2]) + ' to ' + f(bb[3]), DIV[3]], ['more than ' + f(bb[3]), DIV[4]]
+  ].map(([t, c]) => `<div class="row"><i style="background:${c}"></i>${t}</div>`).join('');
+  const nm = FEAT(S.base).n;
+  $('#legend').innerHTML = `<b>Compared with ${esc(nm)}</b><span class="u">${esc(d.label)}: ${fmt(valueFor(m, FEAT(S.base)), d.dec)} ${d.unit === '%' ? '%' : ''}</span>${rows}
+    <div class="seg" role="group" aria-label="Difference as"><button data-diff="rel" aria-pressed="${S.diff === 'rel'}">Relative %</button><button data-diff="abs" aria-pressed="${S.diff === 'abs'}">Difference</button></div>`;
+  $('#hint').textContent = 'Blue is above the baseline area, orange below. Grey: baseline value is zero.';
+}
+function renderSelector() {
+  const ind = IND(), ids = ind.map.selector ? compositionSeries(ind) : null, box = $('#selbox');
+  if (!ids) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `<label for="selSel">Show</label><select id="selSel">${ids.map(id => `<option value="${id}"${id === curMetric() ? ' selected' : ''}>${esc(M[id].label)}</option>`).join('')}</select>`;
+}
+function renderCrumbs() {
+  const parts = [['Scotland', () => go(null, null)]];
+  if (S.la) parts.push([LAS[S.la].n, () => go(S.la, null)]);
+  if (S.loc && !S.cmpOn) parts.push([LOCS[S.loc].n, null]);
+  const base = S.base ? `<span class="chip base">Baseline: ${esc(FEAT(S.base).n)} <button id="clearBase" aria-label="Clear baseline">×</button></span>` : '';
+  $('#crumbbar').innerHTML = (S.la ? '<button id="back">&larr; Back</button>' : '') +
+    parts.map((p, i) => (i ? '<span class="sep">›</span>' : '') + `<button class="crumb${i === parts.length - 1 ? ' here' : ''}" data-i="${i}">${esc(p[0])}</button>`).join('') +
+    `<span class="grow"></span>${base}<button class="tool2" id="cmpBtn" aria-pressed="${S.cmpOn}">&#8644; Compare${S.cmpOn && S.cmp.length ? ' (' + S.cmp.length + ')' : ''}</button>`;
+  $('#crumbbar').querySelectorAll('.crumb').forEach(b => b.onclick = () => { const f = parts[+b.dataset.i][1]; if (f) f(); });
+  const bk = $('#back'); if (bk) bk.onclick = back;
+}
+function notice(t) { const n = $('#notice'); n.textContent = t; n.hidden = false; clearTimeout(n._t); n._t = setTimeout(() => n.hidden = true, 3800); }
+function go(la, loc) {
+  const changed = la !== S.la; S.la = la; S.loc = loc;
+  if (changed) {
+    zoomTo(la ? LAS[la].b : null); S.cmp = [];
+    if (S.base && (la ? LOC_PARENT[S.base] !== la : !LAS[S.base])) S.base = null;
+  }
+  renderAll(true);
+}
+function back() { if (S.loc) go(S.la, null); else if (S.la) go(null, null); }
+function clearSelection() { S.loc = null; S.cmp = []; renderAll(true); }
+function selectFeature(c) {
+  if (S.cmpOn) return toggleCmp(c);
+  if (LAS[c]) return go(c, null);
+  const la = LOC_PARENT[c]; if (!la) return;
+  if (la === S.la && S.loc === c) return go(la, null);
+  go(la, c);
+}
+function toggleCmp(c) {
+  const ok = S.la ? LOC_PARENT[c] === S.la : !!LAS[c];
+  if (!ok) return notice('Compare localities inside this council area, or go back to Scotland to compare council areas.');
+  const i = S.cmp.indexOf(c);
+  if (i >= 0) S.cmp.splice(i, 1); else if (S.cmp.length < SPEC.compare.max_items) S.cmp.push(c); else return notice('Compare up to ' + SPEC.compare.max_items + ' areas. Click one to remove it.');
+  renderAll(true);
+}
+
+/* ---------- Tooltip and hover link between map and charts ---------- */
+const tip = $('#tip');
+function showTip(e, c) {
+  const f = FEAT(c); if (!f) return;
+  const m = curMetric(), d = M[m];
+  const dtxt = S.base && c !== S.base && !!viewFeats().find(x => x.c === c) ? `<br><span>vs baseline:</span> ${fmt(diffOf(m, f), 1)}${S.diff === 'rel' ? '%' : ''}` : '';
+  tip.innerHTML = `<b>${esc(f.n)}</b><br><span>${esc(d.label)}:</span> ${fmt(valueFor(m, f), d.dec)} ${d.unit === '%' ? '%' : ''}${dtxt}<br><span>Residents:</span> ${fmt(f.pop)}`;
+  tip.hidden = false; tip.style.left = Math.min(e.clientX + 14, innerWidth - 230) + 'px'; tip.style.top = (e.clientY + 14) + 'px';
+  ovHl.setAttribute('d', f.d);
+}
+const hideTip = () => { tip.hidden = true; ovHl.setAttribute('d', ''); };
+svg.addEventListener('mousemove', (e) => { const t = e.target.closest('[data-c]'); t ? showTip(e, t.dataset.c) : hideTip(); });
+svg.addEventListener('mouseleave', hideTip);
+svg.addEventListener('click', (e) => { const t = e.target.closest('[data-c]'); t ? selectFeature(t.dataset.c) : clearSelection(); });
+
+/* ---------- Charts ---------- */
+const COL = { dot: '#0065bd', nat: '#333e48', la: '#e87722', sel: '#fdd522', base: '#741e6d' };
+function niceTicks(lo, hi, n = 4) {
+  const span = hi - lo, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag, a = Math.floor(lo / step) * step, out = [];
+  for (let v = a; v <= hi + step * 0.001; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+function legendHTML(o) {
+  const sw = (c) => `<svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" stroke="${c}" stroke-width="2" stroke-dasharray="5 3"/></svg>`;
+  const dot = (c) => `<svg viewBox="0 0 22 8"><circle cx="11" cy="4" r="3.2" fill="${c}"/></svg>`;
+  const items = [];
+  if (o.mark) items.push(`<span>${dot(COL.dot)}${esc(o.mark)}</span>`);
+  for (const m of o.members || []) items.push(`<span>${dot(m.col)}${esc(m.name)}</span>`);
+  if (o.nat) items.push(`<span>${sw(COL.nat)}${esc(o.nat)}</span>`);
+  if (o.la) items.push(`<span>${sw(COL.la)}${esc(o.la)}</span>`);
+  if (o.base) items.push(`<span>${sw(COL.base)}${esc(o.base)}</span>`);
+  return `<div class="leg">${items.join('')}</div>`;
+}
+const refLines = (p) => { const rl = p.reference_lines || []; return { nat: rl.includes('national'), la: rl.includes('la') && !!S.la }; };
+const panelW = () => Math.max(280, $('#panel').clientWidth - 36);
+const memberLeg = (fl) => fl.length && !fl[0].single ? fl.map(x => ({ name: x.f.n, col: x.col })) : [];
+
+function rankedChart(p, ind) {
+  const m = curMetric(), d = M[m], lvl = VIEW_LEVEL(), W = panelW(), H = 230, fl = focusList();
+  const FC = Object.fromEntries(fl.map(x => [x.f.c, x]));
+  const kids = viewFeats().map(f => ({ f, v: valueFor(m, f) })).sort((a, b) => a.v - b.v);
+  const rl = refLines(p), natV = rl.nat ? national(m) : null, laV = rl.la ? valueFor(m, LAS[S.la]) : null;
+  const baseV = S.base && viewFeats().some(f => f.c === S.base) ? valueFor(m, FEAT(S.base)) : null;
+  const L = { l: 46, r: 14, t: 10, b: 28 }, pw = W - L.l - L.r, ph = H - L.t - L.b;
+  let vs = kids.map(k => k.v); for (const x of [natV, laV, baseV]) if (x != null) vs.push(x);
+  let lo = Math.min(...vs), hi = Math.max(...vs), ticks, Y;
+  if (p.mark === 'bar') { lo = 0; hi *= 1.06; ticks = niceTicks(0, hi); hi = ticks[ticks.length - 1]; Y = (v) => L.t + ph * (1 - (v - lo) / (hi - lo)); }
+  else if (p.scale === 'log') {
+    lo = Math.pow(10, Math.floor(Math.log10(Math.max(lo, 0.1)))); hi = Math.pow(10, Math.ceil(Math.log10(hi))); ticks = [];
+    for (let v = lo; v <= hi * 1.001; v *= 10) ticks.push(v);
+    Y = (v) => L.t + ph * (1 - (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)));
+  } else { const pad = (hi - lo) * 0.08 || 1; ticks = niceTicks(lo - pad, hi + pad); lo = ticks[0]; hi = ticks[ticks.length - 1]; Y = (v) => L.t + ph * (1 - (v - lo) / (hi - lo)); }
+  const n = kids.length, X = (i) => L.l + (n === 1 ? pw / 2 : pw * (i + .5) / n);
+  let s = `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.title)}">`;
+  for (const t of ticks) s += `<line x1="${L.l}" x2="${W - L.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="#ebebeb"/><text x="${L.l - 6}" y="${Y(t) + 3.5}" text-anchor="end" font-size="10" fill="#5e5e5e">${fmt(t, t < 10 && d.dec ? Math.min(d.dec, 2) : 0)}</text>`;
+  s += `<line x1="${L.l}" x2="${W - L.r}" y1="${Y(lo)}" y2="${Y(lo)}" stroke="#b3b3b3"/>`;
+  const bw = Math.max(1.4, pw / n - 1.2), r = n > 80 ? 2.1 : n > 32 ? 2.7 : 3.4;
+  let top = '';
+  kids.forEach((k, i) => {
+    const fc = FC[k.f.c];
+    if (fc) { const fill = fc.single ? COL.sel : fc.col;
+      top += p.mark === 'bar'
+        ? `<rect class="dot" data-c="${k.f.c}" x="${X(i) - bw / 2 - 1}" y="${Y(k.v)}" width="${bw + 2}" height="${Math.max(0.5, Y(lo) - Y(k.v))}" fill="${fill}" stroke="#1a1a1a"/>`
+        : `<circle class="dot" data-c="${k.f.c}" cx="${X(i)}" cy="${Y(k.v)}" r="${r + 2.6}" fill="${fill}" stroke="#1a1a1a" stroke-width="1.5"/>`; return; }
+    s += p.mark === 'bar'
+      ? `<rect class="dot" data-c="${k.f.c}" x="${X(i) - bw / 2}" y="${Y(k.v)}" width="${bw}" height="${Math.max(0.5, Y(lo) - Y(k.v))}" fill="${COL.dot}"/>`
+      : `<circle class="dot" data-c="${k.f.c}" cx="${X(i)}" cy="${Y(k.v)}" r="${r}" fill="${COL.dot}" fill-opacity=".8"/>`;
+  });
+  for (const [v, c] of [[natV, COL.nat], [laV, COL.la], [baseV, COL.base]]) if (v != null) s += `<line x1="${L.l}" x2="${W - L.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${c}" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+  s += top;
+  s += `<text x="${L.l}" y="${H - 8}" font-size="10" fill="#5e5e5e">${lvl === 'la' ? '32 council areas' : n + ' localities'}, ranked low to high</text></svg>`;
+  return legendHTML({ mark: lvl === 'la' ? 'Council area' : 'Locality', members: memberLeg(fl),
+    nat: rl.nat ? 'Scotland ' + fmt(natV, d.dec) : null, la: rl.la ? LAS[S.la].n + ' ' + fmt(laV, d.dec) : null,
+    base: baseV != null ? 'Baseline ' + fmt(baseV, d.dec) : null }) + s;
+}
+
+/* Subjects of a breakdown chart: the focus features, or Scotland when nothing is selected. */
+function subjects() {
+  const fl = focusList();
+  return fl.length ? fl : [{ f: null, col: COL.dot, single: true, name: 'Scotland' }];
+}
+const subjName = (x) => x.f ? x.f.n : x.name;
+const subjVal = (id, x) => x.f ? val(id, x.f) : national(id);
+function lineFlags(p, fl) {
+  const rl = p.reference_lines || [], feats = fl.filter(x => x.f);
+  return { nat: rl.includes('national') && feats.length > 0, la: rl.includes('la') && !!S.la && feats.length > 0 && feats.every(x => LOCS[x.f.c]) };
+}
+
+function profileChart(p) {
+  const W = panelW(), H = 230, L = { l: 40, r: 10, t: 16, b: 30 }, pw = W - L.l - L.r, ph = H - L.t - L.b;
+  const subs = subjects(), nS = subs.length, fl = lineFlags(p, subs);
+  const rows = p.series.map(id => ({ id, v: subs.map(x => subjVal(id, x)), nat: national(id), la: S.la ? val(id, LAS[S.la]) : null }));
+  const mx = Math.max(...rows.flatMap(r => [...r.v, fl.nat ? r.nat : 0, fl.la ? r.la : 0]));
+  const ticks = niceTicks(0, mx * 1.12), top = ticks[ticks.length - 1], Y = (v) => L.t + ph * (1 - v / top), n = rows.length, bw = pw / n;
+  let s = `<svg class="ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.title)}">`;
+  for (const t of ticks) s += `<line x1="${L.l}" x2="${W - L.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="${t ? '#ebebeb' : '#b3b3b3'}"/><text x="${L.l - 6}" y="${Y(t) + 3.5}" text-anchor="end" font-size="10" fill="#5e5e5e">${fmt(t)}</text>`;
+  rows.forEach((r, i) => {
+    const gw = bw * 0.72, w = gw / nS, x0 = L.l + bw * i + (bw - gw) / 2;
+    r.v.forEach((v, j) => {
+      s += `<rect x="${x0 + w * j}" y="${Y(v)}" width="${w - (nS > 1 ? 1 : 0)}" height="${Y(0) - Y(v)}" fill="${subs[j].col}"/>`;
+      if (nS === 1) s += `<text x="${x0 + w / 2}" y="${Y(0) - 6}" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="500">${fmt(v, 1)}</text>`;
+    });
+    s += `<text x="${L.l + bw * i + bw / 2}" y="${H - 12}" text-anchor="middle" font-size="10" fill="#333e48">${esc(M[r.id].short)}</text>`;
+  });
+  const line = (key, col) => {
+    const pts = rows.map((r, i) => `${L.l + bw * i + bw / 2},${Y(r[key])}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.8" stroke-dasharray="6 4"/>` +
+      rows.map((r, i) => `<circle cx="${L.l + bw * i + bw / 2}" cy="${Y(r[key])}" r="3" fill="#fff" stroke="${col}" stroke-width="1.8"/>`).join('');
+  };
+  if (fl.nat) s += line('nat', COL.nat);
+  if (fl.la) s += line('la', COL.la);
+  s += '</svg>';
+  const cmp = S.cmpOn && subs.length > 1 || (S.cmpOn && subs.length === 1 && subs[0].f);
+  return legendHTML({ mark: cmp ? null : subjName(subs[0]), members: cmp ? subs.map(x => ({ name: subjName(x), col: x.col })) : [], nat: fl.nat ? 'Scotland' : null, la: fl.la ? LAS[S.la].n : null }) + s;
+}
+
+/* Composition: one row per category, bars for each subject, ticks for the averages. Rows set the map category. */
+function compositionChart(p, ind) {
+  const W = panelW(), subs = subjects(), nS = subs.length, fl = lineFlags(p, subs), LBL = 132, R = 40, pw = W - LBL - R;
+  const rows = p.series.map(id => ({ id, v: subs.map(x => subjVal(id, x)), nat: national(id), la: S.la ? val(id, LAS[S.la]) : null }));
+  rows.sort((a, b) => b.v[0] - a.v[0]);
+  const mx = Math.max(...rows.flatMap(r => [...r.v, fl.nat ? r.nat : 0, fl.la ? r.la : 0])) * 1.08;
+  const bh = nS > 2 ? 6 : nS > 1 ? 8 : 12, rowH = nS * bh + 12, H = rows.length * rowH + 22, X = (v) => LBL + pw * v / mx;
+  const cur = curMetric();
+  let s = `<svg class="ch comp" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.title)}">`;
+  rows.forEach((r, i) => {
+    const y = 6 + i * rowH, on = r.id === cur;
+    s += `<g class="crow" data-sel="${r.id}" tabindex="0" role="button" aria-pressed="${on}"><rect x="0" y="${y - 3}" width="${W}" height="${rowH}" fill="${on ? '#ebebeb' : 'transparent'}"/>`;
+    if (on) s += `<rect x="0" y="${y - 3}" width="3" height="${rowH}" fill="#fdd522"/>`;
+    s += `<text x="8" y="${y + rowH / 2 + 1}" font-size="11" fill="${on ? '#0065bd' : '#1a1a1a'}" font-weight="${on ? 700 : 400}">${esc(M[r.id].label.length > 22 ? M[r.id].label.slice(0, 21) + '…' : M[r.id].label)}</text>`;
+    r.v.forEach((v, j) => {
+      s += `<rect x="${LBL}" y="${y + j * bh}" width="${Math.max(1, X(v) - LBL)}" height="${bh - 1.5}" fill="${subs[j].col}"/>`;
+      if (j === 0) s += `<text x="${X(v) + 4}" y="${y + bh - 2}" font-size="10" fill="#333e48">${fmt(v, 1)}</text>`;
+    });
+    const tick = (v, c) => `<line x1="${X(v)}" x2="${X(v)}" y1="${y - 2}" y2="${y + nS * bh + 1}" stroke="${c}" stroke-width="2" stroke-dasharray="3 2"/>`;
+    if (fl.nat) s += tick(r.nat, COL.nat);
+    if (fl.la) s += tick(r.la, COL.la);
+    s += '</g>';
+  });
+  s += `<line x1="${LBL}" x2="${LBL}" y1="0" y2="${H - 18}" stroke="#b3b3b3"/><text x="${LBL}" y="${H - 5}" font-size="10" fill="#5e5e5e">% of employed people. Click a row to map it.</text></svg>`;
+  const cmp = S.cmpOn && subs[0].f;
+  return legendHTML({ mark: cmp ? null : subjName(subs[0]), members: cmp ? subs.map(x => ({ name: subjName(x), col: x.col })) : [], nat: fl.nat ? 'Scotland' : null, la: fl.la ? LAS[S.la].n : null }) + s;
+}
+
+/* ---------- Right panel ---------- */
+function deltaText(diff, d) { const sign = diff > 0 ? '+' : diff < 0 ? '−' : ''; return `${sign}${fmt(Math.abs(diff), d.dec)}${d.unit === '%' ? ' pts' : ''} vs Scotland`; }
+function baseCandidate() {
+  if (S.cmpOn) return S.cmp.length === 1 ? S.cmp[0] : null;
+  return S.loc || null;
+}
+function renderPanel() {
+  const ind = IND(), m = curMetric(), d = M[m], fl = focusList(), single = fl.length === 1 && fl[0].single ? fl[0].f : null;
+  const totalPop = LA.reduce((s, f) => s + f.pop, 0), totalArea = LA.reduce((s, f) => s + f.a, 0);
+  const isCount = m === 'pop' || m === 'density';
+  let head, cards, desc;
+  if (S.cmpOn) {
+    head = `<h2 class="ptitle">Comparing ${fl.length ? fl.length + ' ' + levelWord(fl.length !== 1) : levelWord(true)}</h2><p class="psub">${S.la ? 'Localities in ' + esc(LAS[S.la].n) : 'Council areas'} · up to ${SPEC.compare.max_items}</p>`;
+    cards = fl.length ? `<table class="cmp"><thead><tr><th></th><th>Residents</th><th>${esc(d.label)}</th><th>vs Scotland</th></tr></thead><tbody>${fl.map(x => {
+      const v = valueFor(m, x.f); return `<tr><td><i style="background:${x.col}"></i>${esc(x.f.n)}</td><td>${fmt(x.f.pop)}</td><td>${fmt(v, d.dec)}${d.unit === '%' ? '%' : ''}</td><td>${isCount ? '–' : deltaText(v - national(m), d).replace(' vs Scotland', '')}</td></tr>`; }).join('')}</tbody></table>` : '';
+    desc = fl.length ? 'Marks and bars take the colour of each area. Click an area on the map or a dot in a chart to add or remove it.' : 'Click areas on the map to compare them. The area you had selected is added automatically.';
+  } else {
+    const focus = single, pop = focus ? focus.pop : totalPop, area = focus ? focus.a : totalArea;
+    const title = focus ? focus.n : 'Scotland';
+    const sub = S.loc ? `Locality · ${LAS[S.la].n} · ${S.loc}` : S.la ? `Council area · ${S.la}` : 'National view · 32 council areas';
+    if (S.loc) desc = `${focus.n} is a census locality assigned to ${LAS[S.la].n}, home to ${fmt(focus.pop)} residents (${fmt(focus.pop / LAS[S.la].pop * 100, 1)}% of the council area) across ${fmt(focus.a, 1)} km².`;
+    else if (S.la) desc = `${focus.n} has ${fmt(focus.pop)} residents (${fmt(focus.pop / totalPop * 100, 1)}% of Scotland) across ${fmt(focus.a)} km², an average of ${fmt(dens(focus))} people per km². ${GEO.loc[S.la].length} census localities are assigned to it.`;
+    else desc = `${fmt(totalPop)} residents across 32 council areas. Click a council area on the map, or a dot in a chart, to see its localities.`;
+    const c4 = isCount
+      ? { k: S.la && !S.loc ? 'Localities' : S.loc ? 'Share of area' : 'Council areas', v: S.la && !S.loc ? GEO.loc[S.la].length : S.loc ? fmt(focus.pop / LAS[S.la].pop * 100, 1) + '%' : 32, d: '' }
+      : { k: d.label, v: fmt(focus ? valueFor(m, focus) : national(m), d.dec) + (d.unit === '%' ? '%' : ''), d: focus ? deltaText(valueFor(m, focus) - national(m), d) : d.unit };
+    head = `<h2 class="ptitle">${esc(title)}</h2><p class="psub">${esc(sub)}</p>`;
+    cards = `<div class="cards">
+      <div class="card"><div class="k">Residents</div><div class="v">${fmt(pop)}</div></div>
+      <div class="card"><div class="k">Area</div><div class="v">${fmt(area, area < 100 ? 1 : 0)} <small style="font-size:.7rem;font-weight:400">km²</small></div></div>
+      <div class="card"><div class="k">Density</div><div class="v">${fmt(pop / Math.max(area, .05))}</div><div class="d">people per km²</div></div>
+      <div class="card"><div class="k">${esc(c4.k)}</div><div class="v">${c4.v}</div><div class="d">${esc(c4.d || '')}</div></div></div>`;
+  }
+  const cand = baseCandidate();
+  const baseBox = S.base
+    ? `<div class="basebox"><b>Baseline: ${esc(FEAT(S.base).n)}</b> The map shows every other ${levelWord(false)} as above or below it. <button class="tool2 sm" id="clearBase2">Clear baseline</button></div>`
+    : cand ? `<div class="basebox"><button class="tool2 sm" id="setBase" data-c="${cand}">Use ${esc(FEAT(cand).n)} as baseline</button> Colour the map by how far every other ${levelWord(false)} is above or below it.</div>` : '';
+  const panels = ind.panels.map(p => {
+    const t = esc(p.title.replace('{children}', levelWord(false)));
+    const body = p.type === 'ranked' ? rankedChart(p, ind) : p.type === 'composition' ? compositionChart(p, ind) : profileChart(p);
+    return `<section class="pnl"><h3>${t}</h3>${body}</section>`;
+  }).join('');
+  $('#panel').innerHTML = `<div class="pin">${head}${cards}<p class="desc">${esc(desc)}</p>${baseBox}${panels}
+    <p class="foot">Reference lines follow the spec: they show only levels broader than the selection, and are left off count measures. Residents, area and density are real; every other value is invented to show the layout.</p></div>`;
+}
+
+/* ---------- YAML view (prints the object the page is drawn from) ---------- */
+function yamlScalar(v) { if (typeof v !== 'string') return String(v); return /^[\w.\-/ ]+$/.test(v) && !/^\s|\s$/.test(v) ? v : JSON.stringify(v); }
+function toYaml(v, ind = 0) {
+  const pad = ' '.repeat(ind);
+  if (Array.isArray(v)) {
+    if (v.every(x => typeof x !== 'object')) return '[' + v.map(yamlScalar).join(', ') + ']';
+    return v.map(x => pad + '- ' + toYaml(x, ind + 2).replace(/^\s+/, '')).join('\n');
+  }
+  if (v && typeof v === 'object') {
+    const inline = (x) => typeof x !== 'object' || (Array.isArray(x) && x.every(y => typeof y !== 'object'));
+    return Object.entries(v).map(([k, x], i) => {
+      const lead = (i === 0 ? '' : pad);
+      if (inline(x)) return `${lead}${k}: ${toYaml(x, ind + 2)}`;
+      if (Array.isArray(x)) return `${lead}${k}:\n${toYaml(x, ind + 2)}`;
+      return `${lead}${k}:\n${toYaml(x, ind + 2).split('\n').map((l, j) => (j === 0 ? ' '.repeat(ind + 2) + l.replace(/^\s+/, '') : l)).join('\n')}`;
+    }).join('\n');
+  }
+  return yamlScalar(v);
+}
+function renderYaml() {
+  const c = SPEC.categories[S.cat], ind = IND(), ids = ind.panels.flatMap(p => p.series || []);
+  const metrics = [...new Set([ind.metric, ...ids])];
+  $('#yamlHead').textContent = 'config/explorer.yaml (excerpt). Metric ids refer to config/metrics.yaml: ' + metrics.join(', ');
+  $('#yamlPre').textContent = toYaml({ compare: SPEC.compare, baseline: SPEC.baseline }) + '\n\n' + toYaml({ categories: [{ id: c.id, label: c.label, indicators: [ind] }] });
+}
+
+/* ---------- Wiring ---------- */
+function renderAll(mapToo) { renderNav(); renderSidebar(); renderCrumbs(); if (mapToo !== false) paintMap(); renderPanel(); if (!$('#yaml').hidden) renderYaml(); }
+document.addEventListener('click', (e) => {
+  const cat = e.target.closest('[data-cat]'); if (cat) { S.cat = +cat.dataset.cat; S.ind = 0; S.base = null; renderAll(); return; }
+  const it = e.target.closest('[data-ind]'); if (it) { S.ind = +it.dataset.ind; S.base = null; renderAll(); return; }
+  if (e.target.closest('#cmpBtn')) { S.cmpOn = !S.cmpOn; S.cmp = S.cmpOn && S.loc ? [S.loc] : []; renderAll(); return; }
+  if (e.target.closest('#clearBase') || e.target.closest('#clearBase2')) { S.base = null; renderAll(); return; }
+  const sb = e.target.closest('#setBase'); if (sb) { S.base = sb.dataset.c; renderAll(); return; }
+  const df = e.target.closest('[data-diff]'); if (df) { S.diff = df.dataset.diff; renderAll(); return; }
+  const row = e.target.closest('[data-sel]'); if (row) { S.sel[IND().id] = row.dataset.sel; renderAll(); return; }
+  const dot = e.target.closest('#panel [data-c]'); if (dot) selectFeature(dot.dataset.c);
+});
+document.addEventListener('change', (e) => { if (e.target.id === 'selSel') { S.sel[IND().id] = e.target.value; renderAll(); } });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { if (S.cmpOn && S.cmp.length) clearSelection(); else if (S.base) { S.base = null; renderAll(); } else back(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('[data-sel]')) { S.sel[IND().id] = e.target.closest('[data-sel]').dataset.sel; renderAll(); }
+});
+$('#panel').addEventListener('mousemove', (e) => { const t = e.target.closest('[data-c]'); t ? showTip(e, t.dataset.c) : hideTip(); });
+$('#panel').addEventListener('mouseleave', hideTip);
+$('#yamlBtn').onclick = () => { const h = $('#yaml'); h.hidden = !h.hidden; $('#yamlBtn').setAttribute('aria-pressed', String(!h.hidden)); if (!h.hidden) renderYaml(); };
+$('#yamlClose').onclick = () => { $('#yaml').hidden = true; $('#yamlBtn').setAttribute('aria-pressed', 'false'); };
+$('#gDz').onclick = () => notice('Data zones are a separate map mode in the build and are not drawn in this mockup.');
+let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(renderPanel, 80); }).observe($('#panel'));
+renderAll();
+</script>

@@ -1,0 +1,39 @@
+id: uv302_general_health
+status: ready
+table: UV302
+title: General health
+scheme: YlOrBr
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV302 - General health.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV302b - General health by age (6).csv", prefix: UV302b}
+  citation: "Scotland's Census 2022, UV302 and UV302b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: very_good, column: "Very good", label: Very good, value: 1}
+  - {id: good, column: "Good", label: Good, value: 2}
+  - {id: fair, column: "Fair", label: Fair, value: 3}
+  - {id: bad, column: "Bad", label: Bad, value: 4}
+  - {id: very_bad, column: "Very bad", label: Very bad, value: 5}
+means:
+  - {id: mean_score, label: "Average health score (1 very good – 5 very bad)", short: Health score, unit: score, decimals: 2}
+note: "Average score: very good = 1 ... very bad = 5, so a higher score means worse self-reported health."
+# UV302b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+splits:
+  - group: age
+    prefix: UV302b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 to 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 to 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 to 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 to 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      very_good: "Very good"
+      good: "Good"
+      fair: "Fair"
+      bad: "Bad"
+      very_bad: "Very bad"

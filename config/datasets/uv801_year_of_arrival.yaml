@@ -1,0 +1,31 @@
+# UV801: year of most recent arrival in the UK, for people born outside it. The three period
+# groups are sums of the published year bands, which are their sub-types.
+id: uv801_year_of_arrival
+status: ready
+table: UV801
+title: Year of arrival in the UK
+scheme: GnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV801 - Year of arrival in UK.csv"
+  citation: "Scotland's Census 2022, UV801, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: born_uk, column: "Born in the UK", label: Born in the UK, short: Born in UK}
+  - {id: y_before_1941, column: "Arrived before 1941", parent: before_1991, label: Arrived before 1941, short: Before 1941}
+  - {id: y1941_1950, column: "Arrived 1941 - 1950", parent: before_1991, label: Arrived 1941 to 1950, short: 1941–1950}
+  - {id: y1951_1960, column: "Arrived 1951 - 1960", parent: before_1991, label: Arrived 1951 to 1960, short: 1951–1960}
+  - {id: y1961_1970, column: "Arrived 1961 - 1970", parent: before_1991, label: Arrived 1961 to 1970, short: 1961–1970}
+  - {id: y1971_1980, column: "Arrived 1971 - 1980", parent: before_1991, label: Arrived 1971 to 1980, short: 1971–1980}
+  - {id: y1981_1990, column: "Arrived 1981 - 1990", parent: before_1991, label: Arrived 1981 to 1990, short: 1981–1990}
+  - {id: y1991_2000, column: "Arrived 1991 - 2000", parent: y1991_2010, label: Arrived 1991 to 2000, short: 1991–2000}
+  - {id: y2001_2010, column: "Arrived 2001 - 2010", parent: y1991_2010, label: Arrived 2001 to 2010, short: 2001–2010}
+  - {id: y2011_2013, column: "Arrived 2011 - 2013", parent: since_2011, label: Arrived 2011 to 2013, short: 2011–2013}
+  - {id: y2014_2016, column: "Arrived 2014 - 2016", parent: since_2011, label: Arrived 2014 to 2016, short: 2014–2016}
+  - {id: y2017_2019, column: "Arrived 2017 - 2019", parent: since_2011, label: Arrived 2017 to 2019, short: 2017–2019}
+  - {id: y2020_2022, column: "Arrived 2020 - 2022", parent: since_2011, label: Arrived 2020 to 2022, short: 2020–2022}
+  # --- periods ---
+  - {id: before_1991, of: [y_before_1941, y1941_1950, y1951_1960, y1961_1970, y1971_1980, y1981_1990], label: Arrived before 1991, short: Before 1991}
+  - {id: y1991_2010, of: [y1991_2000, y2001_2010], label: Arrived 1991 to 2010, short: 1991–2010}
+  - {id: since_2011, of: [y2011_2013, y2014_2016, y2017_2019, y2020_2022], label: Arrived 2011 to 2022, short: 2011–2022}
+  - {id: born_outside, rest_of: [born_uk], label: Born outside the UK, short: Born outside UK}
+note: "Year of most recent arrival to live in the UK, for people born outside the UK. Shares are of all people."

@@ -1,0 +1,37 @@
+id: uv208_gaelic
+status: ready
+table: UV208
+title: Gaelic language skills
+scheme: Greens
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV208 - Gaelic language skills.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV208b - Gaelic language skills (2) by age (6).csv", prefix: UV208b}
+  citation: "Scotland's Census 2022, UV208 and UV208b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: understands_only, column: "Understands but does not speak, read or write Gaelic", label: Understands only, short: Understands}
+  - {id: speaks_reads_writes, column: "Speaks, reads and writes Gaelic", label: "Speaks, reads and writes", short: All skills}
+  - {id: speaks_only, column: "Speaks but does not read or write Gaelic", label: Speaks only, short: Speaks}
+  - {id: speaks_reads, column: "Speaks and reads but does not write Gaelic", label: Speaks and reads, short: Speaks/reads}
+  - {id: reads_only, column: "Reads but does not speak or write Gaelic", label: Reads only, short: Reads}
+  - {id: other_combination, column: "Other combination of skills in Gaelic", label: Other combination, short: Other}
+  - {id: no_skills, column: "No skills in Gaelic", label: No skills, short: None}
+  - {id: any_skills, rest_of: [no_skills], label: Any Gaelic skills, short: Any}
+# UV208b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+# UV208b (by age) has two groups only: any Gaelic skills, and none.
+splits:
+  - group: age
+    prefix: UV208b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "3 - 15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      any_skills: "Understands, speaks, reads or writes Gaelic"
+      no_skills: "No skills in Gaelic"

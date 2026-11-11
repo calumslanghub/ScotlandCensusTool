@@ -1,0 +1,35 @@
+# UV605: industry of employment (UK SIC 2007 sections), 21 exclusive columns.
+# Industry x occupation: do NOT derive "which industries lead to which occupations" from UV605
+# and UV606. Two separate tables give two sets of totals per area, not who works where; that
+# needs a cross-tabulated table.
+id: uv605_industry
+status: ready
+table: UV605
+title: Industry of employment
+scheme: Greens
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV605 - Industry.csv"
+  citation: "Scotland's Census 2022, UV605, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in employment", total_column: "All people aged 16 and over in employment the week before the census"}
+categories:
+  - {id: agriculture, column: "Agriculture; Forestry; Fishing", label: "Agriculture, forestry and fishing", short: Agriculture}
+  - {id: mining, column: "Mining and Quarrying", label: Mining and quarrying, short: Mining}
+  - {id: manufacturing, column: "Manufacturing", label: Manufacturing, short: Manufacturing}
+  - {id: energy, column: "Electricity, Gas, Steam and Air Conditioning Supply", label: "Electricity, gas, steam and air conditioning supply", short: Energy}
+  - {id: water, column: "Water Supply; Sewage; Waste Management and Remediation activities", label: "Water supply, sewerage and waste management", short: Water & waste}
+  - {id: construction, column: "Construction", label: Construction, short: Construction}
+  - {id: retail, column: "Wholesale and Retail trade; Repair of Motor Vehicles and Motorcycles", label: "Wholesale and retail trade; repair of motor vehicles", short: Retail}
+  - {id: transport, column: "Transport and Storage", label: Transport and storage, short: Transport}
+  - {id: hospitality, column: "Accommodation and Food Service Activities", label: Accommodation and food services, short: Hospitality}
+  - {id: information, column: "Information and Communication", label: Information and communication, short: Info & comms}
+  - {id: finance, column: "Financial and Insurance Activities", label: Financial and insurance activities, short: Finance}
+  - {id: real_estate, column: "Real Estate Activities", label: Real estate activities, short: Real estate}
+  - {id: professional, column: "Professional Scientific and Technical Activities", label: "Professional, scientific and technical activities", short: Professional}
+  - {id: admin_support, column: "Administrative and Support Service Activities", label: Administrative and support services, short: Admin & support}
+  - {id: public_admin, column: "Public Administration and Defence; Compulsory Social Security", label: Public administration and defence, short: Public admin}
+  - {id: education, column: "Education", label: Education, short: Education}
+  - {id: health, column: "Human Health and Social Work Activities", label: Human health and social work, short: Health & social}
+  - {id: arts, column: "Arts, Entertainment and Recreation", label: "Arts, entertainment and recreation", short: Arts}
+  - {id: other_services, column: "Other Service Activities", label: Other service activities, short: Other services}
+  - {id: households, column: "Activities of Household as Employers; Undifferentiated Goods - and Services - Producing Activities of Households for Own Use", label: Households as employers, short: Households}
+  - {id: extraterritorial, column: "Activities of Extra-Territorial Organisations and Bodies", label: Extra-territorial organisations and bodies, short: Extra-territorial}

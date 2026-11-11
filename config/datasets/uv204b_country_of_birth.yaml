@@ -1,0 +1,60 @@
+# UV204b: country of birth by sex by age (three header rows; there is no plain UV204 at output
+# area level). Columns end " - Total" for all people of that country group.
+#   "Europe: Total" is not read. "Europe: United Kingdom: Total" is a subtotal of the four
+#   countries and "UK part not specified"; every other row is a column of its own.
+# Age and sex are `splits` of each top-level row, read from the table itself; the sex x age
+# cells are not read. Header spellings ("Antartica") are as published.
+id: uv204b_country_of_birth
+status: ready
+table: UV204b
+title: Country of birth
+scheme: GnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV204b - Country of birth (14) by sex by age (6).csv"
+  citation: "Scotland's Census 2022, UV204b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people - Total"}
+categories:
+  - {id: uk, column: "Europe: United Kingdom: Total - Total", subtotal: true, label: United Kingdom, short: UK}
+  - {id: scotland, column: "Europe: United Kingdom: Scotland - Total", parent: uk, label: Scotland, short: Scotland}
+  - {id: england, column: "Europe: United Kingdom: England - Total", parent: uk, label: England, short: England}
+  - {id: northern_ireland, column: "Europe: United Kingdom: Northern Ireland - Total", parent: uk, label: Northern Ireland, short: N. Ireland}
+  - {id: wales, column: "Europe: United Kingdom: Wales - Total", parent: uk, label: Wales, short: Wales}
+  - {id: uk_unspecified, column: "Europe: United Kingdom: UK part not specified - Total", parent: uk, label: UK part not specified, short: UK unspecified}
+  - {id: channel_islands, column: "Europe: Channel Islands and Isle of Man - Total", label: Channel Islands and Isle of Man, short: Channel Is. & IoM}
+  - {id: ireland, column: "Europe: Other Europe: EU Countries: Republic of Ireland - Total", label: Republic of Ireland, short: Ireland}
+  - {id: eu_member, column: "Europe: Other Europe: EU Countries: Other member countries in March 2022 - Total", label: Other EU member countries (March 2022), short: Other EU}
+  - {id: eu_accession, column: "Europe: Other Europe: EU Countries: Other EU accession countries March 2022 - Total", label: Other EU accession countries (March 2022), short: EU accession}
+  - {id: non_eu, column: "Europe: Other Europe: Non-EU countries - Total", label: Other European countries outside the EU, short: Non-EU Europe}
+  - {id: africa, column: "Africa - Total", label: Africa, short: Africa}
+  - {id: asia, column: "Middle East and Asia - Total", label: Middle East and Asia, short: Mid. East & Asia}
+  - {id: americas, column: "The Americas and the Caribbean - Total", label: The Americas and the Caribbean, short: Americas}
+  - {id: oceania, column: "Antartica and Oceania and Other - Total", label: "Antarctica, Oceania and other", short: Oceania & other}
+  - {id: outside_uk, rest_of: [uk], label: Born outside the UK, short: Outside UK}
+splits:
+  - group: age
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents: &countries
+      uk: "Europe: United Kingdom: Total"
+      channel_islands: "Europe: Channel Islands and Isle of Man"
+      ireland: "Europe: Other Europe: EU Countries: Republic of Ireland"
+      eu_member: "Europe: Other Europe: EU Countries: Other member countries in March 2022"
+      eu_accession: "Europe: Other Europe: EU Countries: Other EU accession countries March 2022"
+      non_eu: "Europe: Other Europe: Non-EU countries"
+      africa: "Africa"
+      asia: "Middle East and Asia"
+      americas: "The Americas and the Caribbean"
+      oceania: "Antartica and Oceania and Other"
+  - group: sex
+    column: "{header} - {band} - Total"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents: *countries
+note: "Country groups are as published: 'other EU member countries' and 'other EU accession countries' follow EU membership in March 2022."

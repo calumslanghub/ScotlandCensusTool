@@ -1,0 +1,37 @@
+# UV212 has five language groups, not individual languages.
+id: uv212_main_language
+status: ready
+table: UV212
+title: Main language
+scheme: Oranges
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV212 - Main language.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV212b - Main language (5) by age (6).csv", prefix: UV212b}
+  citation: "Scotland's Census 2022, UV212 and UV212b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: english, column: "English", label: English}
+  - {id: scots, column: "Scots", label: Scots}
+  - {id: gaelic, column: "Gaelic", label: Gaelic}
+  - {id: sign_language, column: "Sign Language", label: Sign language, short: Sign}
+  - {id: other_language, column: "Other language", label: Other language, short: Other}
+# UV212b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+splits:
+  - group: age
+    prefix: UV212b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "3 - 15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      english: "English"
+      scots: "Scots"
+      gaelic: "Gaelic"
+      sign_language: "Sign Language"
+      other_language: "Other language"

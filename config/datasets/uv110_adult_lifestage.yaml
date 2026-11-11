@@ -1,0 +1,42 @@
+# UV110: adult lifestage. Six age groups, each a "Total" (subtotal) of the household situations
+# listed under it. `with_children` adds up every "with dependent children" column across ages.
+id: uv110_adult_lifestage
+status: ready
+table: UV110
+title: Adult lifestage
+scheme: YlGnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV110 - Adult lifestage.csv"
+  citation: "Scotland's Census 2022, UV110, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in households", total_column: "All people aged 16 and over in households"}
+categories:
+  - {id: a16_24, column: "Aged 16 to 24: Total", subtotal: true, label: "Aged 16 to 24", short: "16–24"}
+  - {id: a16_24_none, column: "Aged 16 to 24: No dependent children in household", parent: a16_24, label: "Aged 16 to 24, no dependent children in household", short: No children}
+  - {id: a16_24_children, column: "Aged 16 to 24: In household with dependent children", parent: a16_24, label: "Aged 16 to 24, in household with dependent children", short: With children}
+  - {id: a25_34, column: "Aged 25 to 34: Total", subtotal: true, label: "Aged 25 to 34", short: "25–34"}
+  - {id: a25_34_none, column: "Aged 25 to 34: No dependent children in household", parent: a25_34, label: "Aged 25 to 34, no dependent children in household", short: No children}
+  - {id: a25_34_c0_4, column: "Aged 25 to 34: Youngest dependent child in household aged 0 to 4", parent: a25_34, label: "Aged 25 to 34, youngest dependent child aged 0 to 4", short: Child 0–4}
+  - {id: a25_34_c5_10, column: "Aged 25 to 34: Youngest dependent child in household aged 5 to 10", parent: a25_34, label: "Aged 25 to 34, youngest dependent child aged 5 to 10", short: Child 5–10}
+  - {id: a25_34_c11_15, column: "Aged 25 to 34: Youngest dependent child in household aged 11 to 15", parent: a25_34, label: "Aged 25 to 34, youngest dependent child aged 11 to 15", short: Child 11–15}
+  - {id: a25_34_c16_18, column: "Aged 25 to 34: Youngest dependent child in household aged 16 to 18", parent: a25_34, label: "Aged 25 to 34, youngest dependent child aged 16 to 18", short: Child 16–18}
+  - {id: a35_54, column: "Aged 35 to 54: Total", subtotal: true, label: "Aged 35 to 54", short: "35–54"}
+  - {id: a35_54_none, column: "Aged 35 to 54: No dependent children in household", parent: a35_54, label: "Aged 35 to 54, no dependent children in household", short: No children}
+  - {id: a35_54_c0_4, column: "Aged 35 to 54: Youngest dependent child in household aged 0 to 4", parent: a35_54, label: "Aged 35 to 54, youngest dependent child aged 0 to 4", short: Child 0–4}
+  - {id: a35_54_c5_10, column: "Aged 35 to 54: Youngest dependent child in household aged 5 to 10", parent: a35_54, label: "Aged 35 to 54, youngest dependent child aged 5 to 10", short: Child 5–10}
+  - {id: a35_54_c11_15, column: "Aged 35 to 54: Youngest dependent child in household aged 11 to 15", parent: a35_54, label: "Aged 35 to 54, youngest dependent child aged 11 to 15", short: Child 11–15}
+  - {id: a35_54_c16_18, column: "Aged 35 to 54: Youngest dependent child in household aged 16 to 18", parent: a35_54, label: "Aged 35 to 54, youngest dependent child aged 16 to 18", short: Child 16–18}
+  - {id: a55_64, column: "Aged 55 to 64: Total", subtotal: true, label: "Aged 55 to 64", short: "55–64"}
+  - {id: a55_64_one, column: "Aged 55 to 64: One person household", parent: a55_64, label: "Aged 55 to 64, one person household", short: One person}
+  - {id: a55_64_two, column: "Aged 55 to 64: Two or more person household: No dependent children", parent: a55_64, label: "Aged 55 to 64, two or more person household, no dependent children", short: 2+ people}
+  - {id: a55_64_children, column: "Aged 55 to 64: Dependent children in household", parent: a55_64, label: "Aged 55 to 64, dependent children in household", short: With children}
+  - {id: a65_74, column: "Aged 65 to 74: Total", subtotal: true, label: "Aged 65 to 74", short: "65–74"}
+  - {id: a65_74_one, column: "Aged 65 to 74: One person household", parent: a65_74, label: "Aged 65 to 74, one person household", short: One person}
+  - {id: a65_74_two, column: "Aged 65 to 74: Two or more person household: No dependent children", parent: a65_74, label: "Aged 65 to 74, two or more person household, no dependent children", short: 2+ people}
+  - {id: a65_74_children, column: "Aged 65 to 74: Dependent children in household", parent: a65_74, label: "Aged 65 to 74, dependent children in household", short: With children}
+  - {id: a75p, column: "Aged 75 and over: Total", subtotal: true, label: "Aged 75 and over", short: "75+"}
+  - {id: a75p_one, column: "Aged 75 and over: One person household", parent: a75p, label: "Aged 75 and over, one person household", short: One person}
+  - {id: a75p_two, column: "Aged 75 and over: Two or more person household", parent: a75p, label: "Aged 75 and over, two or more person household", short: 2+ people}
+  # --- across the age groups ---
+  - {id: with_children, of: [a16_24_children, a25_34_c0_4, a25_34_c5_10, a25_34_c11_15, a25_34_c16_18, a35_54_c0_4, a35_54_c5_10, a35_54_c11_15, a35_54_c16_18, a55_64_children, a65_74_children], label: Adults in a household with dependent children, short: With children}
+  - {id: older_alone, of: [a65_74_one, a75p_one], label: Aged 65 and over living alone, short: 65+ alone}
+note: "Adults aged 75 and over are not split by dependent children, so 'in a household with dependent children' covers adults aged 16 to 74."

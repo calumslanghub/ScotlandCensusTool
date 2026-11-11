@@ -1,0 +1,702 @@
+# config/explorer.yaml: what the explorer shows and how. Drives the top tabs, the left
+# indicator list, the map shading and the right-hand charts. No Census numbers in here:
+# every `metric` / `series` id must exist in config/metrics.yaml (units, decimals, source).
+#
+# Reading order of the UI:
+#   categories[]            -> tabs along the top
+#   categories[].indicators -> list in the left sidebar
+#   indicator.metric        -> the value that shades the map (a metrics.yaml id)
+#   indicator.panels[]      -> charts in the right panel, top to bottom
+#
+# panel.type
+#   ranked   one mark per child of the current view (32 council areas, or the localities
+#            of the selected LA), sorted low to high. mark: dot | bar. scale: linear | log.
+#            `bar` starts at zero. `dot` uses an automatic axis (no zero baseline).
+#   profile  bars for the selected feature across `series` (a share-of-total breakdown).
+#   composition  one row per category with the selected feature's % as a bar and the
+#            averages as ticks. Clicking a row sets the map category (see map.selector).
+# panel.reference_lines (the "average lines")
+#   national  dashed Scotland line
+#   la        dashed line for the selected council area (only drawn once one is selected)
+#   Rule: a line is drawn only for a level broader than what the chart shows, so Scotland's
+#   own profile has no lines. Use [] for count measures (population) where an average
+#   line is meaningless.
+#   breakdown  a pie of the children of the selected category (dataset hierarchies, e.g. flat ->
+#            its sub-types). Clicking a bar in the composition above it picks the category;
+#            `series` lists the parent categories that have children. `group: <name>` shows
+#            the children in that dataset category group instead (e.g. age bands).
+# map: scheme is a d3-scale-chromatic sequential name (Blues, Greens, Oranges, Purples).
+# map.selector: category  adds a "Show" dropdown on the map over the panel's series (or,
+#   for dataset-backed indicators, over every mean and category of the dataset).
+# panel.title may contain {children} (the view's level) and {metric} (the mapped metric).
+#
+# An indicator is backed by EITHER
+#   metric: <id>                   a single value per area from config/metrics.yaml, or
+#   dataset: <id> + headline: <id> a Census table from config/datasets/<id>.yaml. `headline`
+#                                  and panel `series` use the dataset's own category / mean
+#                                  ids (the build adds the dataset prefix); `<id>__n` is a
+#                                  category's count. map.scheme defaults to the dataset's.
+# Never both. Datasets whose status is `draft` are hidden from the UI.
+
+version: 1
+
+# Fixed cards at the top of the right panel for the selected feature.
+summary_cards: [pop, area_km2, density]
+
+# Left sidebar toggle. `drill` is council area > electoral ward > OA > postcode; `localities`
+# is council area > locality > OA > postcode; data zones are a separate national view with
+# no drilling.
+#
+# Each mode is a drill path. The first step is a national layer (the council-area file, or
+# a level in levels.yaml export.national_levels). Each later step shows the features of
+# `level` whose `link` field equals the code of the area opened at the step before; they
+# are filtered in the browser from the open council area's per-LA file. Clicking a council
+# area opens it; below that a click selects an area and a second click (or the panel's
+# button) opens it. `overlays` lists overlays drawn in that mode.
+# `neighbours: true` on a step also shows the features linked to the areas touching the
+# open one (levels.yaml assign.neighbours), across council-area boundaries: e.g. the output
+# areas of every ward around the open ward. They are full members of the view (shaded,
+# selectable, compared, in the baseline and the ranked chart); their council areas' files
+# load lazily. They take the open council area's map classes.
+map_modes:
+  - id: drill
+    label: Drill down
+    default: true
+    path:
+      - {level: la}
+      - {level: ew, link: parent_code}
+      - {level: oa, link: ward_code, neighbours: true}
+      - {level: postcode, link: oa_code}
+  - id: localities
+    label: Localities
+    overlays: [outside_localities]
+    path:
+      - {level: la}
+      - {level: locality, link: parent_code}
+      - {level: oa, link: locality_code}
+      - {level: postcode, link: oa_code}
+  - id: dz
+    label: Data zones
+    path:
+      - {level: dz}
+  # Dumfries and Galloway only for now. Census values are the sums of the OAs each community
+  # council holds the most of (levels.yaml assign.area_fields).
+  - id: cc
+    label: Community councils
+    path:
+      - {level: cc}
+
+# Overlays: features of `level` from the open council area's file where `field` is null,
+# highlighted while the view shows `at`. `enabled`: on by default (the legend toggles it).
+# outside_localities: output areas with no locality (no CLOC2022), kept, never dropped.
+overlays:
+  outside_localities:
+    label: Outside localities
+    enabled: true
+    level: oa
+    at: locality
+    field: locality_code
+
+# Basemap: raster tiles under the areas (`tiles`) and, where the areas are see-through,
+# labels over them (`label_tiles`). `fill_opacity` (level -> 0..1) lets the basemap show
+# through the view's areas at those levels; grey context areas there use `context_opacity`.
+# Every other level is opaque and has no labels. The background colour shows if tiles fail.
+basemap:
+  # Esri Light Gray Canvas (free with attribution; no API key). CARTO's keyless tiles now
+  # return "API key required" images: to use Positron, put keyed CARTO URLs here instead.
+  attribution: 'Basemap &copy; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  tiles:
+    - https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}
+  label_tiles:
+    - https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}
+  tile_size: 256
+  max_zoom: 16            # the tiles' deepest level; MapLibre enlarges them beyond
+  fill_opacity: {oa: 0.7, postcode: 0.7}
+  context_opacity: 0.5
+
+# Colours: copy the v4git palette into web/css/tokens.css; do not hard-code them elsewhere.
+
+# compare: up to max_items areas of the same level, charts and table show them side by side.
+#   max_items is at most 4 (one chart/map colour each). same_level_only must be true.
+# baseline: pick one area; the map shows every other area as above/below it.
+#   modes: relative (value / baseline - 1, as %) and/or difference (points for percentages).
+#   scheme: diverging (the only one). levels: geography levels (config/levels.yaml) where a
+#   baseline can be set; the comparison covers every area the view shows (all of Scotland
+#   for data zones; the open ward's and its neighbours' output areas). min_denominator: areas whose `field` (a common-schema count) is
+#   below `value` are grey instead of compared.
+compare: {max_items: 4, same_level_only: true}
+baseline:
+  modes: [relative, difference]
+  scheme: diverging
+  levels: [la, locality, oa, dz, cc]
+  min_denominator: {field: pop, value: 50}
+
+# "Find areas" (web/js/query.js): a button in the top bar swaps the left sidebar for a query
+# builder. Pick a level, optionally limit it to one council area or ward (`scopes`), add
+# criteria from any Census metric (synthetic metrics are left out) and set each one's range,
+# as percentiles of the areas in scope or as values. Run shades the map by how many criteria
+# each area meets (`scheme` ramp; all of them strongest and outlined).
+#   needs_scope   levels whose data is split per council area (output areas): the query must
+#                 be limited to a council area or a ward
+#   preset_band   High = the top `preset_band` %, Low = the bottom `preset_band` %
+# A ward scope keeps the areas with any output area in the ward (levels.yaml census.groups).
+query:
+  levels: [la, ew, locality, dz, oa, cc]
+  scopes: [la, ew]
+  needs_scope: [oa]
+  preset_band: 25
+  max_criteria: 6
+  scheme: Purples
+
+# "Cluster areas" (web/js/cluster.js): a second mode of the Find areas builder. The same level,
+# scope and Topic -> Metric picker choose the variables; k-means (seeded, in a Web Worker on
+# the viewer's device) groups the areas. "Compute elbow" charts the within-cluster sum of
+# squares for k = 1..k_max with a suggested k; "Run k-means" colours the map by cluster.
+#   enabled          false hides the mode (e.g. a public build); needs the query block
+#   min_cores, min_memory_gb   the mode is offered only on devices with at least this many CPU
+#                    cores and this much memory (where the browser reports it), on screens wider
+#                    than a phone
+#   max_work         budget for the elbow sweep (n areas x variables x sum(1..k_max) x restarts
+#                    x max_iter); larger jobs must be limited to a smaller scope
+#   min_pop          areas with fewer residents are left out (small-number noise)
+#   silhouette_sample  areas sampled for the silhouette score (exact is O(n^2))
+cluster:
+  enabled: true
+  k_max: 10
+  restarts: 4
+  max_iter: 100
+  seed: 2022
+  min_pop: 50
+  silhouette_sample: 2000
+  max_work: 2.0e+10
+  min_cores: 4
+  min_memory_gb: 4
+
+categories:
+- id: demographics
+  label: Demographics
+  indicators:
+  - id: age
+    label: Average age
+    dataset: uv103_age
+    headline: mean_age
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by age band (%)", series: [age_0_15, age_16_24, age_25_44, age_45_64, age_65_74, age_75p], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: age_sex
+    label: Age by sex
+    dataset: uv102b_age_sex
+    headline: female
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by sex (%)", series: [female, male], reference_lines: [national, la]}
+    - {type: composition, title: "Population by five-year age band (%)", series: [a0_4, a5_9, a10_14, a15, a16_17, a18_19, a20_24, a25_29, a30_34, a35_39, a40_44, a45_49, a50_54, a55_59, a60_64, a65_69, a70_74, a75_79, a80_84, a85p], reference_lines: [national, la]}
+    - {type: breakdown, group: sex, title: "Selected age band by sex (% of all people)", series: [a0_4, a5_9, a10_14, a15, a16_17, a18_19, a20_24, a25_29, a30_34, a35_39, a40_44, a45_49, a50_54, a55_59, a60_64, a65_69, a70_74, a75_79, a80_84, a85p], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: residence_type
+    label: Household or communal residents
+    dataset: uv101b_residence_type
+    headline: communal
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Residents by residence type (%)", series: [household, communal], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected residence type by age (% of all people)", series: [household, communal], reference_lines: []}
+    - {type: breakdown, group: sex, title: "Selected residence type by sex (% of all people)", series: [household, communal], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: marital
+    label: Marital and civil partnership status
+    dataset: uv104_marital_status
+    headline: married
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ by status (%)", series: [never_married, married, separated, divorced, widowed], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected status by age (% of people aged 16+)", series: [never_married, married, separated, divorced, widowed], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: living_arrangements
+    label: Living arrangements
+    dataset: uv106_living_arrangements
+    headline: couple
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ in households by living arrangement (%)", series: [couple, not_couple], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected arrangement (% of people aged 16+ in households)", series: [couple, not_couple], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected arrangement by age (% of people aged 16+ in households)", series: [couple, not_couple], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: veterans
+    label: UK Armed Forces veterans
+    dataset: uv901_veterans
+    headline: veteran
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ by veteran status (%)", series: [veteran, not_veteran], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: population
+    label: Total population
+    metric: pop
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Residents by {children}"
+      mark: bar
+      scale: linear
+      reference_lines: []
+  - id: density
+    label: Population density
+    metric: density
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "People per km² by {children}"
+      mark: dot
+      scale: log
+      reference_lines: [national, la]
+- id: households
+  label: Households
+  indicators:
+  - id: household_type
+    label: Household type
+    dataset: uv116_household_type
+    headline: one_person
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by type (%)", series: [one_person, married_none, married_children, cohabiting_none, cohabiting_children, lone_none, lone_children, students, other], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_size
+    label: Household size
+    dataset: uv406_household_size
+    headline: mean_size
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by size (%)", series: [one, two, three, four, five, six, seven, eight_plus], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_composition
+    label: Household composition (households)
+    dataset: uv113_household_composition
+    headline: one_person
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by composition (%)", series: [one_person, family_66p, married, cohabiting, lone_parent, other], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected composition (% of all households)", series: [one_person, married, cohabiting, lone_parent, other], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_composition_people
+    label: Household composition (people)
+    dataset: uv112_household_composition_people
+    headline: one_person
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in households by household composition (%)", series: [one_person, family_66p, married, cohabiting, lone_parent, other], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected composition (% of people in households)", series: [one_person, married, cohabiting, lone_parent, other], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_adults_children
+    label: Adults and children (households)
+    dataset: uv115_household_adults_children
+    headline: with_children
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by adults and children (%)", series: [one_person, one_adult_children, older_couple, two_adults_1_2, two_adults_none, two_adults_3p, three_adults_children, three_adults_none], reference_lines: [national, la]}
+    - {type: breakdown, title: "One person households by age (% of all households)", series: [one_person], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_adults_children_people
+    label: Adults and children (people)
+    dataset: uv114_household_adults_children_people
+    headline: with_children
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in households by adults and children (%)", series: [one_person, one_adult_children, older_couple, two_adults_1_2, two_adults_none, two_adults_3p, three_adults_children, three_adults_none], reference_lines: [national, la]}
+    - {type: breakdown, title: "People living alone by age (% of people in households)", series: [one_person], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: household_lifestage
+    label: Household lifestage
+    dataset: uv111_household_lifestage
+    headline: with_children
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by age of the household reference person (%)", series: [under35, a35_54, a55_64, a65_74, a75p], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected age group (% of all households)", series: [under35, a35_54, a55_64, a65_74, a75p], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: adult_lifestage
+    label: Adult lifestage
+    dataset: uv110_adult_lifestage
+    headline: with_children
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ in households by age group (%)", series: [a16_24, a25_34, a35_54, a55_64, a65_74, a75p], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected age group (% of people aged 16+ in households)", series: [a16_24, a25_34, a35_54, a55_64, a65_74, a75p], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: veteran_households
+    label: Households with a veteran
+    dataset: uv902_veteran_households
+    headline: veteran_household
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by UK Armed Forces veterans (%)", series: [veteran_household, no_veterans], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: identity
+  label: Identity
+  indicators:
+  - id: ethnic_group
+    label: Ethnic group
+    dataset: uv201_ethnic_group
+    headline: not_white
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by ethnic group (%)", series: [white, mixed, asian, african, caribbean_black, other_ethnic], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected group (% of all people)", series: [white, asian, african, caribbean_black, other_ethnic], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected group by age (% of all people)", series: [white, mixed, asian, african, caribbean_black, other_ethnic], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: multiple_ethnic_groups
+    label: Multiple ethnic groups in households
+    dataset: uv203_multiple_ethnic_groups
+    headline: multiple
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by ethnic groups of their members (%)", series: [one_person, same_group, generations, partnerships, other_combination], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: national_identity
+    label: National identity
+    dataset: uv202_national_identity
+    headline: scottish_only
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by national identity (%)", series: [scottish_only, british_only, scottish_british, scottish_other, english_only, other_uk, other_only, other_and_uk], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected identity by age (% of all people)", series: [scottish_only, british_only, scottish_british, scottish_other, english_only, other_uk, other_only, other_and_uk], reference_lines: []}
+    - {type: breakdown, group: sex, title: "Selected identity by sex (% of all people)", series: [scottish_only, british_only, scottish_british, scottish_other, english_only, other_uk, other_only, other_and_uk], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: country_of_birth
+    label: Country of birth
+    dataset: uv204b_country_of_birth
+    headline: outside_uk
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by country of birth (%)", series: [uk, channel_islands, ireland, eu_member, eu_accession, non_eu, africa, asia, americas, oceania], reference_lines: [national, la]}
+    - {type: breakdown, title: "Born in the UK, by country (% of all people)", series: [uk], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected country group by age (% of all people)", series: [uk, channel_islands, ireland, eu_member, eu_accession, non_eu, africa, asia, americas, oceania], reference_lines: []}
+    - {type: breakdown, group: sex, title: "Selected country group by sex (% of all people)", series: [uk, channel_islands, ireland, eu_member, eu_accession, non_eu, africa, asia, americas, oceania], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: religion
+    label: Religion
+    dataset: uv205_religion
+    headline: no_religion
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by religion (%)", series: [church_of_scotland, roman_catholic, other_christian, buddhist, hindu, jewish, muslim, sikh, pagan, other_religion, no_religion, not_stated], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected religion by age (% of all people)", series: [church_of_scotland, roman_catholic, other_christian, buddhist, hindu, jewish, muslim, sikh, pagan, other_religion, no_religion, not_stated], reference_lines: []}
+    - {type: breakdown, group: sex, title: "Selected religion by sex (% of all people)", series: [church_of_scotland, roman_catholic, other_christian, buddhist, hindu, jewish, muslim, sikh, pagan, other_religion, no_religion, not_stated], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: passports
+    label: Passports held
+    dataset: uv206_passports
+    headline: no_uk
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Passports held outside the UK (number of people)", series: [ireland__n, eu__n, rest_of_europe__n, africa__n, middle_east_asia__n, oceania__n, americas__n], reference_lines: []}
+    - {type: composition, title: "Passports held (% of residents)", series: [uk, ireland, eu, rest_of_europe, africa, middle_east_asia, oceania, americas, no_passport], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Holders of the selected passport by age (% of residents)", series: [uk, ireland, eu, rest_of_europe, africa, middle_east_asia, oceania, americas, no_passport], reference_lines: []}
+    - {type: breakdown, group: sex, title: "Holders of the selected passport by sex (% of residents)", series: [uk, ireland, eu, rest_of_europe, africa, middle_east_asia, oceania, americas, no_passport], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: year_of_arrival
+    label: Year of arrival in the UK
+    dataset: uv801_year_of_arrival
+    headline: since_2011
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by year of arrival in the UK (%)", series: [born_uk, before_1991, y1991_2010, since_2011], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected period (% of all people)", series: [before_1991, y1991_2010, since_2011], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: age_of_arrival
+    label: Age of arrival in the UK
+    dataset: uv802_age_of_arrival
+    headline: born_outside
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by age of arrival in the UK (%)", series: [born_uk, a0_15, a16_24, a25_34, a35_49, a50_64, a65p], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: length_of_residence
+    label: Length of residence in the UK
+    dataset: uv803_length_of_residence
+    headline: born_outside
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Population by length of residence in the UK (%)", series: [born_uk, lt2, y2_5, y5_10, y10p], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: language
+  label: Language
+  indicators:
+  - id: language
+    label: Main language
+    dataset: uv212_main_language
+    headline: english
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Main language, people aged 3+ (%)", series: [english, scots, gaelic, sign_language, other_language], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected main language by age (% of people aged 3+)", series: [english, scots, gaelic, sign_language, other_language], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: english
+    label: English language skills
+    dataset: uv210_english
+    headline: not_all_skills
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "English skills, people aged 3+ (%)", series: [speaks_reads_writes, understands_only, speaks_only, speaks_reads, other_skills, no_skills], reference_lines: [national, la]}
+    - {type: breakdown, title: "Other combinations of skills (% of people aged 3+)", series: [other_skills], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected skills by age (% of people aged 3+)", series: [speaks_reads_writes, understands_only, speaks_only, speaks_reads, other_skills, no_skills], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: scots
+    label: Scots language skills
+    dataset: uv209_scots
+    headline: any_skills
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Scots skills, people aged 3+ (%)", series: [understands_only, speaks_reads_writes, speaks_only, speaks_reads, reads_only, other_combination, no_skills], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected skills by age (% of people aged 3+)", series: [understands_only, speaks_reads_writes, speaks_only, speaks_reads, reads_only, other_combination, no_skills], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: gaelic
+    label: Gaelic language skills
+    dataset: uv208_gaelic
+    headline: any_skills
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Gaelic skills, people aged 3+ (%)", series: [understands_only, speaks_reads_writes, speaks_only, speaks_reads, reads_only, other_combination, no_skills], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Any Gaelic skills, or none, by age (% of people aged 3+)", series: [any_skills, no_skills], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: bsl
+    label: British Sign Language skills
+    dataset: uv211_bsl
+    headline: bsl_user
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "BSL users, people aged 3+ (%)", series: [bsl_user, not_bsl_user], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected group by age (% of people aged 3+)", series: [bsl_user, not_bsl_user], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: health
+  label: Health
+  indicators:
+  - id: general_health
+    label: General health
+    dataset: uv302_general_health
+    headline: mean_score
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Self-reported general health (%)", series: [very_good, good, fair, bad, very_bad], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected health by age (% of all people)", series: [very_good, good, fair, bad, very_bad], reference_lines: []}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: disability
+    label: Disability
+    dataset: uv303_disability
+    headline: mean_score
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Day-to-day activities limited (%)", series: [limited_a_lot, limited_a_little, not_limited], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected limitation by age (% of all people)", series: [limited_a_lot, limited_a_little, not_limited], reference_lines: []}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: conditions
+    label: Long-term health conditions
+    dataset: uv304_health_conditions
+    headline: long_term_illness
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People with each condition (%)", series: [hearing, vision, speech, learning, physical, mental_health, long_term_illness], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: unpaid_care
+    label: Provision of unpaid care
+    dataset: uv301_unpaid_care
+    headline: carers
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 3+ by unpaid care (%)", series: [no_care, carers], reference_lines: [national, la]}
+    - {type: breakdown, title: "Hours of unpaid care a week (% of people aged 3+)", series: [carers], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected group by age (% of people aged 3+)", series: [no_care, carers], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: housing
+  label: Housing
+  indicators:
+  - id: accommodation
+    label: Accommodation type
+    dataset: uv402_accommodation
+    headline: house
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by accommodation type (%)", series: [house, flat, caravan], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected type (% of all households)", series: [house, flat], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: accommodation_people
+    label: Accommodation type (people)
+    dataset: uv401_accommodation_people
+    headline: house
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in households by accommodation type (%)", series: [house, flat, caravan], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected type (% of people in households)", series: [house, flat], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: tenure
+    label: Household tenure
+    dataset: uv404_tenure
+    headline: owned
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by tenure (%)", series: [owned, social_rented, private_rented, rent_free], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected tenure (% of all households)", series: [owned, private_rented], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: tenure_people
+    label: Household tenure (people)
+    dataset: uv403_tenure_people
+    headline: owned
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in households by tenure (%)", series: [owned, social_rented, private_rented, rent_free], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected tenure (% of people in households)", series: [owned, private_rented], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: bedrooms
+    label: Number of bedrooms
+    dataset: uv408_bedrooms
+    headline: mean_bedrooms
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by number of bedrooms (%)", series: [one, two, three, four, five_plus], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: occupancy
+    label: Occupancy rating (bedrooms)
+    dataset: uv415_occupancy
+    headline: mean_rating
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by occupancy rating (%)", series: [plus_two, plus_one, zero, minus_one], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: central_heating
+    label: Central heating
+    dataset: uv407_central_heating
+    headline: gas
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by type of central heating (%)", series: [none, gas, electric, oil, solid_fuel, wood, renewable, district, other, two_or_more], reference_lines: [national, la]}
+    - {type: breakdown, title: "Gas central heating by type (% of all households)", series: [gas], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: education
+  label: Education
+  indicators:
+  - id: qualifications
+    label: Highest level of qualification
+    dataset: uv501_qualifications
+    headline: none
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ by highest qualification (%)", series: [none, lower_school, upper_school, apprenticeship, further_education, degree], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected qualification by age (% of people aged 16+)", series: [none, lower_school, upper_school, apprenticeship, further_education, degree], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: employment
+  label: Employment
+  indicators:
+  - id: economic_activity
+    label: Economic activity
+    dataset: uv601_economic_activity
+    headline: active
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ by economic activity (%)", series: [active, inactive], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected group (% of people aged 16+)", series: [active, inactive], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: hrp_economic_activity
+    label: Economic activity of the household reference person
+    dataset: uv602_hrp_economic_activity
+    headline: active
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by economic activity of the reference person (%)", series: [active, inactive], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected group (% of household reference persons)", series: [active, inactive], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: hours_worked
+    label: Hours worked
+    dataset: uv604_hours_worked
+    headline: mean_hours
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in employment by weekly hours worked (%)", series: [h0_15, h16_30, h31_48, h49p], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected hours by age (% of people in employment)", series: [h0_15, h16_30, h31_48, h49p], reference_lines: []}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: industry_census
+    label: Industry of employment
+    dataset: uv605_industry
+    headline: health
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in employment by industry (%)", series: [agriculture, mining, manufacturing, energy, water, construction, retail, transport, hospitality, information, finance, real_estate, professional, admin_support, public_admin, education, health, arts, other_services, households, extraterritorial], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: occupation_census
+    label: Occupation
+    dataset: uv606_occupation
+    headline: professional
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in employment by occupation (%)", series: [managers, professional, associate, admin, skilled_trades, caring_leisure, sales_service, operatives, elementary], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected occupation group (% of people in employment)", series: [managers, professional, associate, admin, skilled_trades, caring_leisure, sales_service, operatives, elementary], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: ns_sec
+    label: Socio-economic classification (NS-SeC)
+    dataset: uv607_ns_sec
+    headline: higher
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People aged 16+ by NS-SeC class (%)", series: [higher, lower_managerial, intermediate, small_employers, lower_supervisory, semi_routine, routine, never_worked, students], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected class (% of people aged 16+)", series: [higher, lower_managerial, small_employers, lower_supervisory, never_worked], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  # Hidden until its dataset has status: ready (the UV608 download is truncated: see
+  # config/datasets/uv608_ns_sec_hrp.yaml).
+  - id: ns_sec_hrp
+    label: Socio-economic classification of the household reference person
+    dataset: uv608_ns_sec_hrp
+    headline: higher
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by NS-SeC class of the reference person (%)", series: [higher, lower_managerial, intermediate, small_employers, lower_supervisory, semi_routine, routine, never_worked, students], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected class (% of household reference persons)", series: [higher, lower_managerial, small_employers, lower_supervisory, never_worked], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+- id: transport
+  label: Transport
+  indicators:
+  - id: cars
+    label: Car or van availability
+    dataset: uv405_cars
+    headline: mean_cars
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by cars or vans (%)", series: [none, one, two, three, four_plus], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: travel_work
+    label: Method of travel to work
+    dataset: uv701_travel_to_work
+    headline: driving
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in employment by method of travel (%)", series: [wfh, driving, passenger, foot, bicycle, bus, rail, other_methods], reference_lines: [national, la]}
+    - {type: breakdown, title: "Within the selected method (% of people in employment)", series: [rail, other_methods], reference_lines: []}
+    - {type: breakdown, group: age, title: "Selected method by age (% of people in employment)", series: [wfh, driving, passenger, foot, bicycle, bus, rail, other_methods], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: commute_distance
+    label: Distance travelled to work
+    dataset: uv703_distance_to_work
+    headline: mean_distance
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People in employment by distance to work (%)", series: [wfh, lt2km, km2_5, km5_10, km10_20, km20_30, km30_40, km40_60, km60p, no_fixed], reference_lines: [national, la]}
+    - {type: breakdown, group: age, title: "Selected distance by age (% of people in employment)", series: [wfh, lt2km, km2_5, km5_10, km10_20, km20_30, km30_40, km40_60, km60p, no_fixed], reference_lines: []}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: travel_work_study
+    label: Travel to work or study (households)
+    dataset: uv702_travel_work_study
+    headline: all_drive
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "Households by people working or studying (%)", series: [none, one, two, three], reference_lines: [national, la]}
+    - {type: breakdown, title: "How they travel, within the selected group (% of all households)", series: [one, two, three], reference_lines: []}
+    - {type: ranked, title: "{metric} (%) by {children}", mark: dot, scale: linear, reference_lines: [national, la]}
+  - id: study_distance
+    label: Distance travelled to place of study
+    dataset: uv704_distance_to_study
+    headline: mean_distance
+    map: {selector: category}
+    panels:
+    - {type: composition, title: "People studying by distance to place of study (%)", series: [home, lt2km, km2_5, km5_10, km10_20, km20_30, km30_40, km40_60, km60p, no_fixed], reference_lines: [national, la]}
+    - {type: ranked, title: "{metric} by {children}", mark: dot, scale: linear, reference_lines: [national, la]}

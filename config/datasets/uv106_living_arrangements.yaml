@@ -1,0 +1,37 @@
+# UV106 + UV106b: living arrangements of adults in households. The two "Total" columns are
+# subtotals of the arrangements under them. UV106b (by age) splits the two totals by age.
+id: uv106_living_arrangements
+status: ready
+table: UV106
+title: Living arrangements
+scheme: PuRd
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV106 - Living arrangements.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV106b - Living arrangements (7) by age (5).csv", prefix: UV106b}
+  citation: "Scotland's Census 2022, UV106 and UV106b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in households", total_column: "All people aged 16 and over in households"}
+categories:
+  - {id: couple, column: "Living in a couple: Total", subtotal: true, label: Living in a couple, short: Couple}
+  - {id: couple_married, column: "Living in a couple: Married or civil partnership couple", parent: couple, label: Married or civil partnership couple, short: Married}
+  - {id: couple_cohabiting, column: "Living in a couple: Cohabiting", parent: couple, label: Cohabiting couple, short: Cohabiting}
+  - {id: not_couple, column: "Not living in a couple: Total", subtotal: true, label: Not living in a couple, short: Not in a couple}
+  - {id: single, column: "Not living in a couple: Single (never married or never in a registered civil partnership)", parent: not_couple, label: "Single (never married or in a civil partnership)", short: Single}
+  - {id: nc_married, column: "Not living in a couple: Married or in a registered civil partnership", parent: not_couple, label: Married or in a civil partnership, short: Married}
+  - {id: nc_separated, column: "Not living in a couple: Separated (but still legally married or still legally in a civil partnership)", parent: not_couple, label: Separated, short: Separated}
+  - {id: nc_divorced, column: "Not living in a couple: Divorced or formerly in a civil partnership which is now legally dissolved", parent: not_couple, label: Divorced or dissolved, short: Divorced}
+  - {id: nc_widowed, column: "Not living in a couple: Widowed or surviving partner from a civil partnership", parent: not_couple, label: Widowed, short: Widowed}
+splits:
+  - group: age
+    prefix: UV106b
+    column: "{header} - {band}"
+    bands:
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      couple: "Living in a couple: Total"
+      not_couple: "Not living in a couple: Total"
+note: "The age breakdown is from UV106b, which is disclosure-controlled separately, so the age bands add up to each share only approximately."

@@ -1,0 +1,30 @@
+# UV704: distance travelled to place of study, in the same bands as distance to work (UV703).
+#
+# The average distance is an estimate from bands, not a measurement: each band counts as its
+# midpoint (`value`, km); the open-ended top band "60km and over" counts as 75 km (1.25 x its
+# lower limit, an assumption, as in uv703); studying from home and no fixed place of study
+# have no distance and are left out of the average but kept in the shares.
+id: uv704_distance_to_study
+status: ready
+table: UV704
+title: Distance travelled to place of study
+scheme: Purples
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV704 - Distance travelled to place of study.csv"
+  citation: "Scotland's Census 2022, UV704, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 4 and over studying", total_column: "All people aged 4 and over studying the week before the census"}
+categories:
+  - {id: home, column: "Mainly study from home", label: "Mainly study from home", short: "Home"}
+  - {id: lt2km, column: "Less than 2km", label: "Less than 2 km", short: "<2 km", value: 1}
+  - {id: km2_5, column: "2km to less than 5km", label: "2 km to under 5 km", short: "2-5 km", value: 3.5}
+  - {id: km5_10, column: "5km to less than 10km", label: "5 km to under 10 km", short: "5-10 km", value: 7.5}
+  - {id: km10_20, column: "10km to less than 20km", label: "10 km to under 20 km", short: "10-20 km", value: 15}
+  - {id: km20_30, column: "20km to less than 30km", label: "20 km to under 30 km", short: "20-30 km", value: 25}
+  - {id: km30_40, column: "30km to less than 40km", label: "30 km to under 40 km", short: "30-40 km", value: 35}
+  - {id: km40_60, column: "40km to less than 60km", label: "40 km to under 60 km", short: "40-60 km", value: 50}
+  - {id: km60p, column: "60km and over", label: "60 km and over", short: "60+ km", value: 75}
+  - {id: no_fixed, column: "Other - No fixed place of study or studying outside the UK", label: "No fixed place of study or studying outside the UK", short: "No fixed place"}
+  - {id: under_5km, of: [lt2km, km2_5], label: "Less than 5 km", short: "<5 km"}
+means:
+  - {id: mean_distance, label: Average distance to place of study (estimated), short: Average distance, unit: km, decimals: 1}
+note: "Average distance is estimated from bands: each band counts as its midpoint and '60 km and over' as 75 km. People studying mainly from home or with no fixed place of study are left out of the average but shown as categories. More than half of output areas have fewer than 20 people studying and show no data: use wards, data zones or larger areas."

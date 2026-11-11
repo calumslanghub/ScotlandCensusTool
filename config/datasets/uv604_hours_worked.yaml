@@ -1,0 +1,40 @@
+# UV604 + UV604b: hours worked per week. UV604b (by age) splits each band by age.
+#
+# The average is an estimate from bands, not a measurement: each band counts as its midpoint
+# (`value`, hours) and the open-ended "49 or more hours" as 55 (an assumption).
+id: uv604_hours_worked
+status: ready
+table: UV604
+title: Hours worked
+scheme: Greens
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV604 - Hours worked.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV604b - Hours worked by age (5).csv", prefix: UV604b}
+  citation: "Scotland's Census 2022, UV604 and UV604b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in employment", total_column: "All people aged 16 and over in employment the week before the census"}
+categories:
+  - {id: h0_15, column: "0 to 15 hours", label: 0 to 15 hours, short: 0–15, value: 7.5}
+  - {id: h16_30, column: "16 to 30 hours", label: 16 to 30 hours, short: 16–30, value: 23}
+  - {id: h31_48, column: "31 to 48 hours", label: 31 to 48 hours, short: 31–48, value: 39.5}
+  - {id: h49p, column: "49 or more hours", label: 49 or more hours, short: 49+, value: 55}
+  - {id: part_time, of: [h0_15, h16_30], label: Part-time (30 hours or less), short: Part-time}
+  - {id: full_time, of: [h31_48, h49p], label: Full-time (31 hours or more), short: Full-time}
+splits:
+  - group: age
+    prefix: UV604b
+    column: "{header} - {band}"
+    bands:
+      - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 to 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 to 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 to 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      h0_15: "0 to 15 hours"
+      h16_30: "16 to 30 hours"
+      h31_48: "31 to 48 hours"
+      h49p: "49 or more hours"
+means:
+  - {id: mean_hours, label: Average weekly hours worked (estimated), short: Average hours, unit: hours a week, decimals: 1}
+note: "Average hours is estimated from bands: each band counts as its midpoint and '49 or more hours' as 55."

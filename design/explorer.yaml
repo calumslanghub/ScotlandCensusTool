@@ -1,0 +1,277 @@
+# config/explorer.yaml: what the explorer shows and how. Drives the top tabs, the left
+# indicator list, the map shading and the right-hand charts. No Census numbers in here:
+# every `metric` / `series` id must exist in config/metrics.yaml (units, decimals, source).
+#
+# Reading order of the UI:
+#   categories[]            -> tabs along the top
+#   categories[].indicators -> list in the left sidebar
+#   indicator.metric        -> the value that shades the map (a metrics.yaml id)
+#   indicator.panels[]      -> charts in the right panel, top to bottom
+#
+# panel.type
+#   ranked   one mark per child of the current view (32 council areas, or the localities
+#            of the selected LA), sorted low to high. mark: dot | bar. scale: linear | log.
+#            `bar` starts at zero. `dot` uses an automatic axis (no zero baseline).
+#   profile  bars for the selected feature across `series` (a share-of-total breakdown).
+#   composition  one row per category with the selected feature's % as a bar and the
+#            averages as ticks. Clicking a row sets the map category (see map.selector).
+# panel.reference_lines (the "average lines")
+#   national  dashed Scotland line
+#   la        dashed line for the selected council area (only drawn once one is selected)
+#   Rule: a line is drawn only for a level broader than what the chart shows, so Scotland's
+#   own profile has no lines. Use [] for count measures (population) where an average
+#   line is meaningless.
+# map: scheme is a d3-scale-chromatic sequential name (Blues, Greens, Oranges, Purples).
+# map.selector: category  adds a "Show" dropdown on the map over the panel's series (or,
+#   for dataset-backed indicators, over the dataset's categories).
+#
+# An indicator is backed by EITHER
+#   metric: <id>                   a single value per area from config/metrics.yaml, or
+#   dataset: <id> + measure: <id>  a Census table from config/datasets/<id>.yaml
+# Never both. Datasets whose status is `draft` are validated but hidden from the UI.
+
+version: 1
+
+# Fixed cards at the top of the right panel for the selected feature.
+summary_cards: [pop, area_km2, density]
+
+# Left sidebar toggle. `drill` is LA > locality > OA > postcode; data zones are a separate
+# view with their own map and no drilling out of them.
+map_modes:
+  - { id: drill, label: Drill down, default: true }
+  - { id: dz, label: Data zones }
+
+# Diagnostic overlay: output areas with no locality (CLOC2022 is null in the lookup).
+# Shown inside a council area, on by default, until you decide how to treat them.
+overlays:
+  outside_localities: { enabled: true, label: Outside localities }
+
+# Colours: copy the v4git palette into web/css/tokens.css; do not hard-code them elsewhere.
+
+# compare: up to max_items areas of the same level, charts and table show them side by side.
+# baseline: pick one area; the map shows every other area as above/below it.
+compare: {max_items: 4, same_level_only: true}
+baseline:
+  modes: [relative, difference]
+  scheme: diverging
+  levels: [la, locality, oa]
+
+categories:
+- id: population
+  label: Population
+  indicators:
+  - id: median_age
+    label: Median age
+    metric: median_age
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Median age by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: age_structure
+    label: Age structure
+    metric: age_75p
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: profile
+      title: "Population by age band (%)"
+      series: [age_0_15, age_16_24, age_25_44, age_45_64, age_65_74, age_75p]
+      reference_lines: [national, la]
+    - type: ranked
+      title: "Aged 75 and over (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: population
+    label: Total population
+    metric: pop
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Residents by {children}"
+      mark: bar
+      scale: linear
+      reference_lines: []
+  - id: density
+    label: Population density
+    metric: density
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "People per km² by {children}"
+      mark: dot
+      scale: log
+      reference_lines: [national, la]
+- id: households
+  label: Households & housing
+  indicators:
+  - id: tenure
+    label: Tenure
+    metric: ten_social
+    levels: [la, locality]
+    map: {scheme: Oranges, classes: 5, method: quantile}
+    panels:
+    - type: profile
+      title: "Households by tenure (%)"
+      series: [ten_own_outright, ten_mortgage, ten_social, ten_private, ten_other]
+      reference_lines: [national, la]
+    - type: ranked
+      title: "Social rented (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: hh_size
+    label: Average household size
+    metric: hh_size
+    levels: [la, locality]
+    map: {scheme: Greens, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "People per household by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+- id: health
+  label: Health
+  indicators:
+  - id: health_good
+    label: Good or very good health
+    metric: health_good
+    levels: [la, locality]
+    map: {scheme: Greens, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Good or very good health (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: ltc
+    label: Long-term condition
+    metric: ltc
+    levels: [la, locality]
+    map: {scheme: Purples, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "One or more long-term conditions (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+- id: education
+  label: Education
+  indicators:
+  - id: no_quals
+    label: No qualifications
+    metric: no_quals
+    levels: [la, locality]
+    map: {scheme: Oranges, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "No qualifications (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: degree
+    label: Degree level or above
+    metric: degree
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Degree level or above (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+- id: labour
+  label: Labour market
+  indicators:
+  - id: econ_active
+    label: Economic activity rate
+    metric: econ_active
+    levels: [la, locality]
+    map: {scheme: Greens, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Economically active, aged 16+ (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: industry
+    label: Industry of employment
+    metric: ind_health
+    levels: [la, locality]
+    map: {scheme: Blues, classes: 5, method: quantile, selector: category}
+    panels:
+    - type: composition
+      title: "Employed people by industry (%)"
+      series: [ind_health, ind_retail, ind_education, ind_public, ind_construction, ind_other]
+      reference_lines: [national, la]
+- id: transport
+  label: Travel
+  indicators:
+  - id: travel_work
+    label: Travel to work
+    metric: tw_cycle
+    levels: [la, locality]
+    map: {scheme: Greens, classes: 5, method: quantile}
+    panels:
+    - type: profile
+      title: "Usual way of travelling to work (%)"
+      series: [tw_car, tw_pt, tw_walk, tw_cycle, tw_home]
+      reference_lines: [national, la]
+    - type: ranked
+      title: "Cycle to work (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+  - id: no_car
+    label: No car or van
+    metric: no_car
+    levels: [la, locality]
+    map: {scheme: Oranges, classes: 5, method: quantile}
+    panels:
+    - type: ranked
+      title: "Households with no car or van (%) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]
+
+# ---- Dataset-backed indicators (config/datasets/*.yaml). Hidden until status: ready. ----
+- id: work_travel
+  label: Work and travel
+  indicators:
+  - id: industry_census
+    label: Industry of employment
+    dataset: uv605_industry
+    map: {measure: share, selector: category, scheme: Blues, classes: 5, method: quantile}
+    panels:
+    - type: composition
+      title: "Employed people by industry (%)"
+      reference_lines: [national, la]
+  - id: occupation_census
+    label: Occupation
+    dataset: uv606_occupation
+    map: {measure: share, selector: category, scheme: Purples, classes: 5, method: quantile}
+    panels:
+    - type: composition
+      title: "Employed people by occupation (%)"
+      reference_lines: [national, la]
+  - id: commute_distance
+    label: Distance travelled to work
+    dataset: uv703_distance_to_work
+    map: {measure: mean_distance_km, scheme: Greens, classes: 5, method: quantile}
+    panels:
+    - type: composition
+      title: "How far people travel to work (%)"
+      reference_lines: [national, la]
+    - type: ranked
+      measure: mean_distance_km
+      title: "Mean distance to work (km) by {children}"
+      mark: dot
+      scale: linear
+      reference_lines: [national, la]

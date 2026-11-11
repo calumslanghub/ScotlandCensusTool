@@ -1,0 +1,26 @@
+# UV115: household composition by numbers of adults and children (alternative definitions: a child
+# is aged under 16, an adult 16 and over), counted in households. "Other households: Total" is not read;
+# its seven types are shown beside one person households.
+id: uv115_household_adults_children
+status: ready
+table: UV115
+title: Adults and children in households (households)
+scheme: GnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV115 - Household composition (alternative child and adult definitions) - Households.csv"
+  citation: "Scotland's Census 2022, UV115, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All households", total_column: "All households", unit: households}
+categories:
+  - {id: one_person, column: "One person household: Total", subtotal: true, label: One person household, short: One person}
+  - {id: one_66p, column: "One person household: Person aged 66 and over", parent: one_person, label: "One person household, aged 66 and over", short: 66 and over}
+  - {id: one_under66, column: "One person household: Person aged under 66", parent: one_person, label: "One person household, aged under 66", short: Under 66}
+  - {id: one_adult_children, column: "Other households: No adults or one adult and one or more children", label: "No adults, or one adult, with one or more children", short: 1 adult + children}
+  - {id: older_couple, column: "Other households: One adult aged 16 to 65 and one aged 66 and over and no children or two adults aged 66 and over and no children", label: "Two adults, at least one aged 66 and over, no children", short: 2 adults (66+)}
+  - {id: two_adults_1_2, column: "Other households: Two adults and one or two children", label: "Two adults and one or two children", short: 2 adults + 1-2 children}
+  - {id: two_adults_none, column: "Other households: Two adults aged 16 to 65 and no children", label: "Two adults aged 16 to 65, no children", short: 2 adults (16-65)}
+  - {id: two_adults_3p, column: "Other households: Two adults and three or more children", label: "Two adults and three or more children", short: 2 adults + 3+ children}
+  - {id: three_adults_children, column: "Other households: Three or more adults and one or more children", label: "Three or more adults and one or more children", short: 3+ adults + children}
+  - {id: three_adults_none, column: "Other households: Three or more adults and no children", label: "Three or more adults, no children", short: 3+ adults}
+  # --- across the household types ---
+  - {id: with_children, of: [one_adult_children, two_adults_1_2, two_adults_3p, three_adults_children], label: Households with children, short: With children}
+note: "Alternative definitions: a child is anyone aged under 16 and an adult anyone aged 16 and over, whatever their relationship."

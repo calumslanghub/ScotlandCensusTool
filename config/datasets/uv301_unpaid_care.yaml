@@ -1,0 +1,37 @@
+# UV301 + UV301b: provision of unpaid care. "All unpaid carers" is a subtotal of the four
+# hours bands. UV301b (by age) names the same columns differently ("Provides no unpaid care",
+# "Provides unpaid care: Total") and its title line says "aged 16 and over", but its columns
+# are people aged 3 and over with a 3 to 15 band, like UV301.
+id: uv301_unpaid_care
+status: ready
+table: UV301
+title: Provision of unpaid care
+scheme: OrRd
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV301 - Provision of unpaid care.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV301b - Provision of unpaid care by age (6).csv", prefix: UV301b}
+  citation: "Scotland's Census 2022, UV301 and UV301b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: no_care, column: "No", label: Provides no unpaid care, short: No care}
+  - {id: carers, column: "All unpaid carers", subtotal: true, label: Provides unpaid care, short: Carers}
+  - {id: h1_19, column: "Yes, 1 to 19 hours a week", parent: carers, label: 1 to 19 hours a week, short: 1–19 hours}
+  - {id: h20_34, column: "Yes, 20 to 34 hours a week", parent: carers, label: 20 to 34 hours a week, short: 20–34 hours}
+  - {id: h35_49, column: "Yes, 35 to 49 hours a week", parent: carers, label: 35 to 49 hours a week, short: 35–49 hours}
+  - {id: h50p, column: "Yes, 50 or more hours a week", parent: carers, label: 50 or more hours a week, short: 50+ hours}
+splits:
+  - group: age
+    prefix: UV301b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "3 to 15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 to 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 to 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 to 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      no_care: "Provides no unpaid care"
+      carers: "Provides unpaid care: Total"
+note: "Unpaid care is help or support given because of long-term physical or mental ill-health, disability or old age, excluding paid employment."

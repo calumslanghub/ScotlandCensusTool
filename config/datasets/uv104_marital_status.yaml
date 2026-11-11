@@ -1,0 +1,37 @@
+id: uv104_marital_status
+status: ready
+table: UV104
+title: Marital and civil partnership status
+scheme: Purples
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV104 - Marital and civil partnership status.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV104b - Marital and civil partnership status (5) by age (5).csv", prefix: UV104b}
+  citation: "Scotland's Census 2022, UV104 and UV104b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over", total_column: "All people aged 16 and over"}
+categories:
+  - {id: never_married, column: "Never married and never registered in a civil partnership", label: Never married or in a civil partnership, short: Never}
+  - {id: married, column: "Married or in a registered civil partnership", label: Married or in a civil partnership, short: Married}
+  - {id: separated, column: "Separated, but still legally married or still legally in a civil partnership", label: Separated, short: Separated}
+  - {id: divorced, column: "Divorced or civil partnership dissolved", label: Divorced or dissolved, short: Divorced}
+  - {id: widowed, column: "Widowed or surviving civil partnership partner", label: Widowed, short: Widowed}
+# UV104b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+# UV104b (by age) spells its headers differently from UV104 ("Seperated", "Divorced or formerly
+# in a civil partnership ..."): `splits.parents` names them as published.
+splits:
+  - group: age
+    prefix: UV104b
+    column: "{header} - {band}"
+    bands:
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      never_married: "Never married and never registered in a civil partnership"
+      married: "Married or in a registered civil partnership"
+      separated: "Seperated, but still legally married or still legally in a civil partnership"
+      divorced: "Divorced or formerly in a civil partnership which is now legally dissolved"
+      widowed: "Widowed or surviving partner from a civil partnership"

@@ -1,0 +1,61 @@
+# UV703: distance travelled to work. Banded counts, one column per band, including
+# "Mainly work from home". Run `python -m build.inspect` on the CSV, then fix the `column`,
+# `label` and `value` of each band below to match the file. The band list here follows your
+# notes and is NOT checked against the file yet.
+#
+# Mean distance from bands is an estimate, not a measurement:
+#   - each band is replaced by one representative value (`value`, in km; midpoint is the default)
+#   - the top band is open-ended, so its value is a pure assumption (set it, and say so)
+#   - work-from-home people are excluded from the mean (listed in `exclude`) but kept in shares
+# So also publish the exact measures (share_of): % under 5 km, % 10 km or more, % working from home.
+# Those need no assumptions and are easier to defend than a mean.
+id: uv703_distance_to_work
+status: draft
+table: UV703
+title: Distance travelled to work
+source:
+  file: data/census/UV703-oa.csv      # TODO save the Output Areas CSV here
+  geography: oa
+  code_column: TODO
+  skip_rows: 0
+  encoding: utf-8-sig
+  citation: "Scotland's Census 2022, UV703 Distance travelled to work, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe:
+  label: "People aged 16 and over (check the table notes: in employment, or all?)"
+  total_column: TODO
+categories:                           # TODO replace with the real bands from the CSV header
+  - { id: wfh,      column: TODO, label: "Mainly work from home" }
+  - { id: lt2km,    column: TODO, label: "Less than 2 km",      value: 1.0 }
+  - { id: km2_5,    column: TODO, label: "2 km to under 5 km",  value: 3.5 }
+  - { id: km5_10,   column: TODO, label: "5 km to under 10 km", value: 7.5 }
+  # TODO add the remaining bands (10 km and over) exactly as the file splits them
+measures:
+  - id: share
+    kind: share
+    selector: category
+    label: "% of people"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20
+  - id: mean_distance_km
+    kind: mean_from_bands
+    include: [lt2km, km2_5, km5_10]   # TODO add the longer bands; leave out wfh and any "other / no fixed place" band
+    label: "Mean distance to work (estimated from bands)"
+    unit: "km"
+    decimals: 1
+    min_denominator: 20
+    assumption: "Band midpoints; top band set to 1.25 x its lower limit"   # shown in the UI info note
+  - id: short_under_5km
+    kind: share_of
+    of: [lt2km, km2_5]
+    label: "% travelling under 5 km"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20
+  - id: share_wfh
+    kind: share_of
+    of: [wfh]
+    label: "% mainly working from home"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20

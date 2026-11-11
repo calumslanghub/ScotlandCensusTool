@@ -1,0 +1,35 @@
+# UV606: occupation. Same shape as UV605, so this file differs only in ids, labels and the
+# source. If you find yourself writing anything else here, the closed vocabulary is missing a
+# kind: stop and add it to build/measures.py with a test.
+# Industry x occupation: do NOT try to derive "industries that lead to occupations" from UV605 and
+# UV606. Two separate tables give two sets of totals per area, not who works where. That needs a
+# cross-tabulation table (industry by occupation). Check whether one is published for the geography
+# you want before designing a view.
+id: uv606_occupation
+status: draft
+table: UV606
+title: Occupation
+source:
+  file: data/census/UV606-oa.csv      # TODO save the Output Areas CSV here
+  geography: oa
+  code_column: TODO
+  skip_rows: 0
+  encoding: utf-8-sig
+  citation: "Scotland's Census 2022, UV606 Occupation, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe:
+  label: "People aged 16 and over in employment"   # TODO confirm against the table notes
+  total_column: TODO
+categories: []                        # TODO paste from `build.inspect`
+measures:
+  - id: share
+    kind: share
+    selector: category
+    label: "% of employed people"
+    unit: "%"
+    decimals: 1
+    min_denominator: 20
+  - id: count
+    kind: count
+    label: "Employed people"
+    unit: "people"
+    decimals: 0

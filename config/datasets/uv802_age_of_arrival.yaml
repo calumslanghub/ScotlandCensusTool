@@ -1,0 +1,21 @@
+# UV802: age at most recent arrival in the UK, for people born outside it.
+id: uv802_age_of_arrival
+status: ready
+table: UV802
+title: Age of arrival in the UK
+scheme: GnBu
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV802 - Age of arrival in UK.csv"
+  citation: "Scotland's Census 2022, UV802, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: born_uk, column: "Born in the UK", label: Born in the UK, short: Born in UK}
+  - {id: a0_15, column: "0 - 15", label: Arrived aged 0 to 15, short: "0–15"}
+  - {id: a16_24, column: "16 - 24", label: Arrived aged 16 to 24, short: "16–24"}
+  - {id: a25_34, column: "25 - 34", label: Arrived aged 25 to 34, short: "25–34"}
+  - {id: a35_49, column: "35 - 49", label: Arrived aged 35 to 49, short: "35–49"}
+  - {id: a50_64, column: "50 - 64", label: Arrived aged 50 to 64, short: "50–64"}
+  - {id: a65p, column: "65 and over", label: Arrived aged 65 and over, short: "65+"}
+  - {id: born_outside, rest_of: [born_uk], label: Born outside the UK, short: Born outside UK}
+  - {id: arrived_as_adult, of: [a16_24, a25_34, a35_49, a50_64, a65p], label: Arrived aged 16 and over, short: Arrived as adult}
+note: "Age at most recent arrival to live in the UK, for people born outside the UK. Shares are of all people."

@@ -1,0 +1,70 @@
+id: uv205_religion
+status: ready
+table: UV205
+title: Religion
+scheme: BuPu
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV205 - Religion.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV205b - Religion (12) by sex by age (6).csv", prefix: UV205b}
+  citation: "Scotland's Census 2022, UV205 and UV205b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: church_of_scotland, column: "Church of Scotland", label: Church of Scotland, short: CofS}
+  - {id: roman_catholic, column: "Roman Catholic", label: Roman Catholic, short: Catholic}
+  - {id: other_christian, column: "Other Christian", label: Other Christian, short: Other Chr.}
+  - {id: buddhist, column: "Buddhist", label: Buddhist}
+  - {id: hindu, column: "Hindu", label: Hindu}
+  - {id: jewish, column: "Jewish", label: Jewish}
+  - {id: muslim, column: "Muslim", label: Muslim}
+  - {id: sikh, column: "Sikh", label: Sikh}
+  - {id: pagan, column: "Pagan", label: Pagan}
+  - {id: other_religion, column: "Other religion", label: Other religion, short: Other}
+  - {id: no_religion, column: "No religion", label: No religion, short: None}
+  - {id: not_stated, column: "Religion not stated", label: Religion not stated, short: Not stated}
+# UV205b (by sex and age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+# UV205b (by sex by age) labels its oldest band "65 - 115".
+splits:
+  - group: age
+    prefix: UV205b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 - 115", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      church_of_scotland: "Church of Scotland"
+      roman_catholic: "Roman Catholic"
+      other_christian: "Other Christian"
+      buddhist: "Buddhist"
+      hindu: "Hindu"
+      jewish: "Jewish"
+      muslim: "Muslim"
+      sikh: "Sikh"
+      pagan: "Pagan"
+      other_religion: "Other religion"
+      no_religion: "No religion"
+      not_stated: "Religion not stated"
+  - group: sex
+    prefix: UV205b
+    column: "{header} - {band} - Total"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents:
+      church_of_scotland: "Church of Scotland"
+      roman_catholic: "Roman Catholic"
+      other_christian: "Other Christian"
+      buddhist: "Buddhist"
+      hindu: "Hindu"
+      jewish: "Jewish"
+      muslim: "Muslim"
+      sikh: "Sikh"
+      pagan: "Pagan"
+      other_religion: "Other religion"
+      no_religion: "No religion"
+      not_stated: "Religion not stated"

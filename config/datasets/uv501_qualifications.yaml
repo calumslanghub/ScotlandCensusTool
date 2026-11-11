@@ -1,0 +1,37 @@
+id: uv501_qualifications
+status: ready
+table: UV501
+title: Highest level of qualification
+scheme: Blues
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV501 - Highest level of qualification.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV501b - Highest level of qualification by age (5).csv", prefix: UV501b}
+  citation: "Scotland's Census 2022, UV501 and UV501b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over", total_column: "All people aged 16 and over"}
+categories:
+  - {id: none, column: "No qualifications", label: No qualifications, short: None}
+  - {id: lower_school, column: "Lower school qualifications", label: Lower school, short: Lower school}
+  - {id: upper_school, column: "Upper school qualifications", label: Upper school, short: Upper school}
+  - {id: apprenticeship, column: "Apprenticeship qualifications", label: Apprenticeship, short: Apprent.}
+  - {id: further_education, column: "Further Education and sub-degree Higher Education qualifications incl. HNC/HNDs", label: "Further education and sub-degree (incl. HNC/HND)", short: FE/HNC/HND}
+  - {id: degree, column: "Degree level qualifications or above", label: Degree level or above, short: Degree}
+# UV501b (by age) splits each category for the breakdown pies; it is disclosure-controlled
+# separately, so a category's bands add up to its share only approximately.
+splits:
+  - group: age
+    prefix: UV501b
+    column: "{header} - {band}"
+    bands:
+      - {id: a16_24, header: "16 to 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 to 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 to 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 to 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      none: "No qualifications"
+      lower_school: "Lower school qualifications"
+      upper_school: "Upper school qualifications"
+      apprenticeship: "Apprenticeship qualifications"
+      further_education: "Further Education and sub-degree Higher Education qualifications incl. HNC/HNDs"
+      degree: "Degree level qualifications or above"

@@ -1,0 +1,13 @@
+# UV901: people who have previously served in the UK Armed Forces.
+id: uv901_veterans
+status: ready
+table: UV901
+title: UK Armed Forces veterans
+scheme: Reds
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV901 - UK Armed Forces veterans.csv"
+  citation: "Scotland's Census 2022, UV901, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over", total_column: "All people aged 16 and over"}
+categories:
+  - {id: veteran, column: "UK Armed Forces veteran", label: UK Armed Forces veteran, short: Veteran}
+  - {id: not_veteran, column: "Not a UK Armed Forces veteran", label: Not a UK Armed Forces veteran, short: Not a veteran}

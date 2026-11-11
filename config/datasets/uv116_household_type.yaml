@@ -1,0 +1,21 @@
+# UV116: household type, a nine-way summary (couples and lone parents by dependent children).
+id: uv116_household_type
+status: ready
+table: UV116
+title: Household type
+scheme: BuGn
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV116 - Household type.csv"
+  citation: "Scotland's Census 2022, UV116, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All households", total_column: "All households", unit: households}
+categories:
+  - {id: one_person, column: "One person household", label: One person household, short: One person}
+  - {id: married_none, column: "Married or civil partnership couple household: No dependent children", label: "Married or civil partnership couple, no dependent children", short: Married}
+  - {id: married_children, column: "Married or civil partnership couple household: With dependent children", label: "Married or civil partnership couple, with dependent children", short: Married + children}
+  - {id: cohabiting_none, column: "Cohabiting couple household: No dependent children", label: "Cohabiting couple, no dependent children", short: Cohabiting}
+  - {id: cohabiting_children, column: "Cohabiting couple household: With dependent children", label: "Cohabiting couple, with dependent children", short: Cohabiting + children}
+  - {id: lone_none, column: "Lone parent household: No dependent children", label: "Lone parent, no dependent children", short: Lone parent}
+  - {id: lone_children, column: "Lone parent household: With dependent children", label: "Lone parent, with dependent children", short: Lone parent + children}
+  - {id: students, column: "Multi-person household: All full-time students", label: "Multi-person household, all full-time students", short: Students}
+  - {id: other, column: "Multi-person household: Other", label: "Multi-person household, other", short: Other}
+  - {id: with_children, of: [married_children, cohabiting_children, lone_children], label: Households with dependent children, short: With children}

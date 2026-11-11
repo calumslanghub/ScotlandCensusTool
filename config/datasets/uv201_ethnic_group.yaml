@@ -1,0 +1,60 @@
+# UV201 + UV201b: ethnic group. Five groups have a "Total" (subtotal) column with the detailed
+# groups under it. "Other White" is published without the "White:" prefix but is part of
+# "White: Total" (the six White columns add up to it). UV201b (by age) splits each of the six
+# top-level groups by age; its detailed groups by age are not read.
+id: uv201_ethnic_group
+status: ready
+table: UV201
+title: Ethnic group
+scheme: PuBuGn
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV201 - Ethnic group.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV201b - Ethnic group (19) by age (6).csv", prefix: UV201b}
+  citation: "Scotland's Census 2022, UV201 and UV201b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All People"}
+categories:
+  - {id: white, column: "White: Total", subtotal: true, label: White, short: White}
+  - {id: white_scottish, column: "White: White Scottish", parent: white, label: White Scottish, short: Scottish}
+  - {id: white_other_british, column: "White: Other White British", parent: white, label: Other White British, short: Other British}
+  - {id: white_irish, column: "White: White Irish", parent: white, label: White Irish, short: Irish}
+  - {id: white_gypsy_traveller, column: "White: Gypsy/ Traveller", parent: white, label: Gypsy / Traveller, short: Gypsy/Traveller}
+  - {id: white_polish, column: "White: White Polish", parent: white, label: White Polish, short: Polish}
+  - {id: white_other, column: "Other White", parent: white, label: Other White, short: Other White}
+  - {id: mixed, column: "Mixed or multiple ethnic group", label: Mixed or multiple ethnic group, short: Mixed}
+  - {id: asian, column: "Asian, Asian Scottish or Asian British: Total", subtotal: true, label: "Asian, Asian Scottish or Asian British", short: Asian}
+  - {id: pakistani, column: "Asian, Asian Scottish or Asian British: Pakistani, Pakistani Scottish or Pakistani British", parent: asian, label: "Pakistani, Pakistani Scottish or Pakistani British", short: Pakistani}
+  - {id: indian, column: "Asian, Asian Scottish or Asian British: Indian, Indian Scottish or Indian British", parent: asian, label: "Indian, Indian Scottish or Indian British", short: Indian}
+  - {id: bangladeshi, column: "Asian, Asian Scottish or Asian British: Bangladeshi, Bangladeshi Scottish or Bangladeshi British", parent: asian, label: "Bangladeshi, Bangladeshi Scottish or Bangladeshi British", short: Bangladeshi}
+  - {id: chinese, column: "Asian, Asian Scottish or Asian British: Chinese, Chinese Scottish or Chinese British", parent: asian, label: "Chinese, Chinese Scottish or Chinese British", short: Chinese}
+  - {id: asian_other, column: "Asian, Asian Scottish or Asian British: Other Asian", parent: asian, label: Other Asian, short: Other Asian}
+  - {id: african, column: "African: Total", subtotal: true, label: African, short: African}
+  - {id: african_scottish_british, column: "African: African, African Scottish or African British", parent: african, label: "African, African Scottish or African British", short: African Scottish/British}
+  - {id: african_other, column: "African: Other African", parent: african, label: Other African, short: Other African}
+  - {id: caribbean_black, column: "Caribbean or Black: Total", subtotal: true, label: Caribbean or Black, short: Caribbean/Black}
+  - {id: caribbean, column: "Caribbean or Black: Caribbean, Caribbean Scottish or Caribbean British", parent: caribbean_black, label: "Caribbean, Caribbean Scottish or Caribbean British", short: Caribbean}
+  - {id: black, column: "Caribbean or Black: Black, Black Scottish or Black British", parent: caribbean_black, label: "Black, Black Scottish or Black British", short: Black}
+  - {id: caribbean_black_other, column: "Caribbean or Black: Other Caribbean or Black", parent: caribbean_black, label: Other Caribbean or Black, short: Other}
+  - {id: other_ethnic, column: "Other ethnic groups: Total", subtotal: true, label: Other ethnic groups, short: Other}
+  - {id: arab, column: "Other ethnic groups: Arab, Arab Scottish or Arab British", parent: other_ethnic, label: "Arab, Arab Scottish or Arab British", short: Arab}
+  - {id: other_group, column: "Other ethnic groups: Other ethnic group", parent: other_ethnic, label: Other ethnic group, short: Other group}
+  - {id: not_white, rest_of: [white], label: "Mixed, Asian, African, Caribbean or Black, or other ethnic group", short: Not White}
+splits:
+  - group: age
+    prefix: UV201b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      white: "White: Total"
+      mixed: "Mixed or multiple ethnic group"
+      asian: "Asian, Asian Scottish or Asian British: Total"
+      african: "African: Total"
+      caribbean_black: "Caribbean or Black: Total"
+      other_ethnic: "Other ethnic groups: Total"
+note: "Small groups are heavily affected by disclosure control in small areas. The age breakdown is from UV201b, published separately, so the age bands add up to each group's share only approximately."

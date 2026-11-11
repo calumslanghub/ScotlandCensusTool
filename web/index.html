@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Census Explorer</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <!-- Classic scripts (globals): MapLibre has no ES module build; the annotation plugin's
+       UMD build attaches to the global Chart, so both share one Chart.js copy. -->
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header id="topnav">
+    <div id="logo">Census Explorer</div>
+    <nav id="cats" role="tablist" aria-label="Census topics"></nav>
+    <div id="navright"><button id="queryBtn" type="button" aria-pressed="false" hidden>&#9906; Find areas</button><span class="badge" id="dataBadge"></span></div>
+  </header>
+
+  <div id="body">
+    <aside id="sidebar" aria-label="Indicators">
+      <div id="sbExplore">
+        <div class="sbh">Map view</div>
+        <div class="geo" id="modes" role="group" aria-label="Map view"></div>
+        <div class="sbh" id="sbCat">Indicators</div>
+        <div id="sbList"></div>
+        <div id="sbFoot">Click a council area to open it. Below that, click an area (or a mark in a chart) to select it and click it again to open it. Click blank map to deselect. Esc clears compare, then the baseline, then steps back.</div>
+      </div>
+      <div id="queryBuilder" aria-label="Find areas" hidden></div>
+    </aside>
+
+    <main id="mapwrap">
+      <nav id="crumbbar" aria-label="Breadcrumb">
+        <button id="back" type="button" title="Back one level (Esc)" hidden>&larr; Back</button>
+        <span id="crumbs"></span>
+        <span class="grow"></span>
+        <span id="baseChip"></span>
+        <button id="cmpBtn" class="tool2" type="button" aria-pressed="false" hidden>&#8644; Compare</button>
+        <span id="queryCrumb" hidden></span>
+      </nav>
+      <div id="mapbox">
+        <div id="map" role="region" aria-label="Map of Scotland"></div>
+        <div id="selbox" hidden></div>
+        <div id="legend" hidden></div>
+        <div id="hint"></div>
+        <div id="notice" role="status" hidden></div>
+      </div>
+    </main>
+
+    <aside id="panel" aria-live="polite"></aside>
+  </div>
+  <div id="tip" hidden></div>
+</body>
+</html>

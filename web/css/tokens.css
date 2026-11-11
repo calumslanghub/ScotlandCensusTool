@@ -1,0 +1,100 @@
+/* Design tokens: every colour and font the app uses. No colour literals anywhere else:
+   CSS uses var(--name); JS (map paint, charts) reads these through js/tokens.js.
+   Palette from design/mockup.src.html (v4git). Choropleth ramps come from
+   d3-scale-chromatic by name (map.scheme in config/explorer.yaml). */
+:root {
+  /* v4git palette (mockup :root) */
+  --blue: #0065bd;
+  --blue-dark: #00437e;
+  --yellow: #fdd522;
+  --ink: #1a1a1a;
+  --slate: #333e48;
+  --muted: #5e5e5e;
+  --line: #b3b3b3;
+  --hair: #ebebeb;
+  --paper: #f8f8f8;
+  --panel: #ffffff;
+  --red: #d32205;
+  --orange: #e87722;
+  --green: #1a7032;
+  --teal: #28a197;
+  --purple: #741e6d;
+  --ctx: #e2e2e2;
+
+  --font: 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --mono: 'Roboto Mono', ui-monospace, Consolas, monospace;
+
+  /* Roles (also from the mockup) */
+  --on-blue: #ffffff;              /* text on the blue top bar */
+  --on-blue-muted: #dbe9f6;        /* secondary text on the top bar */
+  --surface-sunken: #fafafa;       /* cards, map-view toggle strip */
+  --ctx-hover: #d2d2d2;            /* greyed context council area under the pointer */
+  --selected-la-fill: #f1f1f1;     /* the open council area behind its localities */
+  --map-bg: #ffffff;
+  --no-data: #cfcfcf;
+  --overlay-bg: rgba(255, 255, 255, 0.94);  /* legend, selector, hint over the map */
+  --swatch-edge: rgba(0, 0, 0, 0.15);
+  --tip-bg: var(--slate);
+  --tip-ink: #ffffff;
+  --tip-muted: #cfd8e0;
+  --focus: var(--ink);
+
+  /* Map strokes */
+  --map-edge: #ffffff;             /* boundaries between shaded areas */
+  --map-la-outline: var(--blue);   /* the open council area */
+  --map-hover: var(--ink);
+  --map-select-outer: var(--ink);
+  --map-select-inner: var(--yellow);
+
+  /* Charts */
+  --chart-mark: var(--blue);
+  --chart-national: var(--slate);
+  --chart-la: var(--orange);
+  --chart-selected: var(--yellow);
+  --chart-selected-edge: var(--ink);
+  --chart-grid: var(--hair);
+  --chart-axis: var(--line);
+  --chart-text: var(--muted);
+  --chart-label: var(--slate);
+
+  /* Compare: one colour per area, in chart series and map outlines (compare.max_items <= 4) */
+  --compare-1: var(--red);
+  --compare-2: var(--green);
+  --compare-3: var(--orange);
+  --compare-4: var(--teal);
+
+  /* Baseline: diverging map scale (orange below, blue above), the baseline area itself,
+     its outline and chart line, and the panel/crumb tints (mockup) */
+  --div-below-2: #e87722;
+  --div-below-1: #f5b98a;
+  --div-mid: #f1f1f1;
+  --div-above-1: #9cc2e4;
+  --div-above-2: #0065bd;
+  --baseline-fill: #ffffff;
+  --baseline: var(--purple);
+  --baseline-tint: #f6eff6;
+  --baseline-tint-edge: #e3d0e1;
+  --baseline-chip: #f1e6f0;
+  --baseline-chip-edge: #d9bfd6;
+  --chart-baseline: var(--baseline);
+
+  /* Overlay: output areas outside any locality (highlighted inside a council area) */
+  --outside: #c2185b;
+  --outside-fill-alpha: 0.45;
+
+  /* Find areas: areas meeting no criterion, the outline of full matches, builder tints.
+     Steps for 1..n criteria come from explorer.query.scheme (d3-scale-chromatic). */
+  --query-none: #ececec;
+  --query-outline: var(--ink);
+  --query-tint: #f3f7fb;
+  --query-edge: #c9dbec;
+  --query-warn: var(--illus-ink);
+  --query-thumb: var(--blue);
+
+  /* "Illustrative data" badge for synthetic metrics */
+  --illus-bg: #fdf0e4;
+  --illus-ink: #8f3f05;
+  --illus-edge: var(--orange);
+
+  color-scheme: light;
+}

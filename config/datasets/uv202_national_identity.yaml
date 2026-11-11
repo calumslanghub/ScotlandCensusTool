@@ -1,0 +1,51 @@
+# UV202 + UV202b: national identity, eight exclusive combinations. UV202b (by sex by age, three
+# header rows) splits each by age and by sex; its sex x age cells are not read.
+id: uv202_national_identity
+status: ready
+table: UV202
+title: National identity
+scheme: Blues
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV202 - National Identity.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV202b - National identity by sex by age (6).csv", prefix: UV202b}
+  citation: "Scotland's Census 2022, UV202 and UV202b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All people", total_column: "All people"}
+categories:
+  - {id: scottish_only, column: "Scottish identity only", label: Scottish identity only, short: Scottish only}
+  - {id: british_only, column: "British identity only", label: British identity only, short: British only}
+  - {id: scottish_british, column: "Scottish and British identities only", label: Scottish and British identities only, short: Scottish & British}
+  - {id: scottish_other, column: "Scottish and any other identities", label: Scottish and any other identities, short: Scottish & other}
+  - {id: english_only, column: "English identity only", label: English identity only, short: English only}
+  - {id: other_uk, column: "Any other combination of UK identities (UK only)", label: Any other combination of UK identities, short: Other UK}
+  - {id: other_only, column: "Other identity only (1)", label: Other identity only, short: Other only}
+  - {id: other_and_uk, column: "Other identity and at least one UK identity", label: Other identity and at least one UK identity, short: Other & UK}
+  - {id: any_scottish, of: [scottish_only, scottish_british, scottish_other], label: Any Scottish identity, short: Any Scottish}
+splits:
+  - group: age
+    prefix: UV202b
+    column: "{header} - {band}"
+    bands:
+      - {id: a0_15, header: "0 - 15", label: "aged 0 to 15", short: "0 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents: &identities
+      scottish_only: "Scottish identity only"
+      british_only: "British identity only"
+      scottish_british: "Scottish and British identities only"
+      scottish_other: "Scottish and any other identities"
+      english_only: "English identity only"
+      other_uk: "Any other combination of UK identities (UK only)"
+      other_only: "Other identity only (1)"
+      other_and_uk: "Other identity and at least one UK identity"
+  - group: sex
+    prefix: UV202b
+    column: "{header} - {band} - Total"
+    bands:
+      - {id: female, header: "Female", label: "female", short: "Female"}
+      - {id: male, header: "Male", label: "male", short: "Male"}
+    parents: *identities
+note: "'Other identity only' is an identity from outside the UK with no UK identity. The age and sex breakdowns are from UV202b, published separately, so they add up to each share only approximately."

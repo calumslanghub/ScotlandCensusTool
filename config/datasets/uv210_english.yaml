@@ -1,0 +1,50 @@
+# UV210 + UV210b: English language skills. UV210 has ten combinations; UV210b (by age) groups
+# five of them as "other combinations", so those five are sub-types of `other_skills` and the
+# shown rows follow UV210b's six groups.
+#
+# UV210b is published in another layout: unquoted, with a row of commas before its two header
+# rows, and its youngest band reads "Mar-15" (a spreadsheet's reading of "3 - 15"). The band
+# below names it as published; "comibinations" is the file's spelling too.
+id: uv210_english
+status: ready
+table: UV210
+title: English language skills
+scheme: Oranges
+source:
+  file: "data/raw/Census/Census2022OutputAreaUV/UV210 - English language skills.csv"
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV210b - English language skills (6) by age (6).csv", prefix: UV210b}
+  citation: "Scotland's Census 2022, UV210 and UV210b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 3 and over", total_column: "All people aged 3 and over"}
+categories:
+  - {id: speaks_reads_writes, column: "Speaks, reads and writes English", label: "Speaks, reads and writes", short: All skills}
+  - {id: understands_only, column: "Understands spoken English only", label: Understands spoken English only, short: Understands}
+  - {id: speaks_only, column: "Speaks but does not read or write English", label: Speaks only, short: Speaks}
+  - {id: speaks_reads, column: "Speaks and reads but does not write English", label: Speaks and reads, short: Speaks/reads}
+  - {id: reads_only, column: "Reads but does not speak or write English", parent: other_skills, label: Reads only, short: Reads}
+  - {id: writes_only, column: "Writes but does not speak or read English", parent: other_skills, label: Writes only, short: Writes}
+  - {id: reads_writes, column: "Reads and writes but does not speak English", parent: other_skills, label: Reads and writes, short: Reads/writes}
+  - {id: other_combination, column: "Other combinations of skills in English", parent: other_skills, label: Other combination, short: Other}
+  - {id: limited, column: "Limited English skills", parent: other_skills, label: Limited English skills, short: Limited}
+  - {id: other_skills, of: [reads_only, writes_only, reads_writes, other_combination, limited], label: Other combinations of skills, short: Other skills}
+  - {id: no_skills, column: "No skills in English", label: No skills, short: None}
+  - {id: not_all_skills, rest_of: [speaks_reads_writes], label: "Does not speak, read and write English", short: Not all skills}
+splits:
+  - group: age
+    prefix: UV210b
+    column: "{header} - {band}"
+    bands:
+      - {id: a3_15, header: "Mar-15", label: "aged 3 to 15", short: "3 to 15"}
+      - {id: a16_24, header: "16 - 24", label: "aged 16 to 24", short: "16 to 24"}
+      - {id: a25_34, header: "25 - 34", label: "aged 25 to 34", short: "25 to 34"}
+      - {id: a35_49, header: "35 - 49", label: "aged 35 to 49", short: "35 to 49"}
+      - {id: a50_64, header: "50 - 64", label: "aged 50 to 64", short: "50 to 64"}
+      - {id: a65p, header: "65 and over", label: "aged 65 and over", short: "65 and over"}
+    parents:
+      speaks_reads_writes: "Speaks, reads and writes English"
+      understands_only: "Understands spoken English only"
+      speaks_only: "Speaks but does not read or write English"
+      speaks_reads: "Speaks and reads but does not write English"
+      other_skills: "Other comibinations of skills in English"
+      no_skills: "No skills in English"
+note: "'Does not speak, read and write English' includes young children who cannot yet read or write."

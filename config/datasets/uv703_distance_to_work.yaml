@@ -1,0 +1,94 @@
+# UV703 + UV703b: distance travelled to work. UV703b (by age) has the same bands, so each
+# band's age split (`group: age`) feeds the age breakdown pie.
+#
+# The average distance is an estimate from bands, not a measurement: each band counts as its
+# midpoint (`value`, km); the open-ended top band "60km and over" counts as 75 km (1.25 x its
+# lower limit, an assumption); working from home and no fixed place of work have no distance
+# and are left out of the average but kept in the shares. "Less than 5 km" needs no assumption.
+id: uv703_distance_to_work
+status: ready
+table: UV703
+title: Distance travelled to work
+scheme: Purples
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV703 - Distance travelled to work.csv
+  extra:
+    - {file: "data/raw/Census/Census2022OutputAreaUV/UV703b - Distance travelled to work by age (5).csv", prefix: UV703b}
+  citation: "Scotland's Census 2022, UV703 and UV703b, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "People aged 16 and over in employment", total_column: "All people aged 16 and over in employment the week before the census (including full-time students if they gave a work address as the address they primarily travel to for work or study)"}
+categories:
+  - {id: wfh, column: "Mainly work from home", label: "Mainly work from home", short: "Home"}
+  - {id: lt2km, column: "Less than 2km", label: "Less than 2 km", short: "<2 km", value: 1}
+  - {id: km2_5, column: "2km to less than 5km", label: "2 km to under 5 km", short: "2-5 km", value: 3.5}
+  - {id: km5_10, column: "5km to less than 10km", label: "5 km to under 10 km", short: "5-10 km", value: 7.5}
+  - {id: km10_20, column: "10km to less than 20km", label: "10 km to under 20 km", short: "10-20 km", value: 15}
+  - {id: km20_30, column: "20km to less than 30km", label: "20 km to under 30 km", short: "20-30 km", value: 25}
+  - {id: km30_40, column: "30km to less than 40km", label: "30 km to under 40 km", short: "30-40 km", value: 35}
+  - {id: km40_60, column: "40km to less than 60km", label: "40 km to under 60 km", short: "40-60 km", value: 50}
+  - {id: km60p, column: "60km and over", label: "60 km and over", short: "60+ km", value: 75}
+  - {id: no_fixed, column: "Other - No fixed place of work or working outside the UK", label: "No fixed place of work or working outside the UK", short: "No fixed place"}
+  - {id: under_5km, of: [lt2km, km2_5], label: "Less than 5 km", short: "<5 km"}
+  # --- UV703b: each band by age (never in the denominator) ---
+  # Mainly work from home
+  - {id: wfh_a16_24, column: "UV703b: Mainly work from home - 16 to 24", parent: wfh, group: age, label: "Mainly work from home, aged 16 to 24", short: "16 to 24"}
+  - {id: wfh_a25_34, column: "UV703b: Mainly work from home - 25 to 34", parent: wfh, group: age, label: "Mainly work from home, aged 25 to 34", short: "25 to 34"}
+  - {id: wfh_a35_49, column: "UV703b: Mainly work from home - 35 to 49", parent: wfh, group: age, label: "Mainly work from home, aged 35 to 49", short: "35 to 49"}
+  - {id: wfh_a50_64, column: "UV703b: Mainly work from home - 50 to 64", parent: wfh, group: age, label: "Mainly work from home, aged 50 to 64", short: "50 to 64"}
+  - {id: wfh_a65p, column: "UV703b: Mainly work from home - 65 and over", parent: wfh, group: age, label: "Mainly work from home, aged 65 and over", short: "65 and over"}
+  # Less than 2 km
+  - {id: lt2km_a16_24, column: "UV703b: Less than 2km - 16 to 24", parent: lt2km, group: age, label: "Less than 2 km, aged 16 to 24", short: "16 to 24"}
+  - {id: lt2km_a25_34, column: "UV703b: Less than 2km - 25 to 34", parent: lt2km, group: age, label: "Less than 2 km, aged 25 to 34", short: "25 to 34"}
+  - {id: lt2km_a35_49, column: "UV703b: Less than 2km - 35 to 49", parent: lt2km, group: age, label: "Less than 2 km, aged 35 to 49", short: "35 to 49"}
+  - {id: lt2km_a50_64, column: "UV703b: Less than 2km - 50 to 64", parent: lt2km, group: age, label: "Less than 2 km, aged 50 to 64", short: "50 to 64"}
+  - {id: lt2km_a65p, column: "UV703b: Less than 2km - 65 and over", parent: lt2km, group: age, label: "Less than 2 km, aged 65 and over", short: "65 and over"}
+  # 2 km to under 5 km
+  - {id: km2_5_a16_24, column: "UV703b: 2km to less than 5km - 16 to 24", parent: km2_5, group: age, label: "2 km to under 5 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km2_5_a25_34, column: "UV703b: 2km to less than 5km - 25 to 34", parent: km2_5, group: age, label: "2 km to under 5 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km2_5_a35_49, column: "UV703b: 2km to less than 5km - 35 to 49", parent: km2_5, group: age, label: "2 km to under 5 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km2_5_a50_64, column: "UV703b: 2km to less than 5km - 50 to 64", parent: km2_5, group: age, label: "2 km to under 5 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km2_5_a65p, column: "UV703b: 2km to less than 5km - 65 and over", parent: km2_5, group: age, label: "2 km to under 5 km, aged 65 and over", short: "65 and over"}
+  # 5 km to under 10 km
+  - {id: km5_10_a16_24, column: "UV703b: 5km to less than 10km - 16 to 24", parent: km5_10, group: age, label: "5 km to under 10 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km5_10_a25_34, column: "UV703b: 5km to less than 10km - 25 to 34", parent: km5_10, group: age, label: "5 km to under 10 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km5_10_a35_49, column: "UV703b: 5km to less than 10km - 35 to 49", parent: km5_10, group: age, label: "5 km to under 10 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km5_10_a50_64, column: "UV703b: 5km to less than 10km - 50 to 64", parent: km5_10, group: age, label: "5 km to under 10 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km5_10_a65p, column: "UV703b: 5km to less than 10km - 65 and over", parent: km5_10, group: age, label: "5 km to under 10 km, aged 65 and over", short: "65 and over"}
+  # 10 km to under 20 km
+  - {id: km10_20_a16_24, column: "UV703b: 10km to less than 20km - 16 to 24", parent: km10_20, group: age, label: "10 km to under 20 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km10_20_a25_34, column: "UV703b: 10km to less than 20km - 25 to 34", parent: km10_20, group: age, label: "10 km to under 20 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km10_20_a35_49, column: "UV703b: 10km to less than 20km - 35 to 49", parent: km10_20, group: age, label: "10 km to under 20 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km10_20_a50_64, column: "UV703b: 10km to less than 20km - 50 to 64", parent: km10_20, group: age, label: "10 km to under 20 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km10_20_a65p, column: "UV703b: 10km to less than 20km - 65 and over", parent: km10_20, group: age, label: "10 km to under 20 km, aged 65 and over", short: "65 and over"}
+  # 20 km to under 30 km
+  - {id: km20_30_a16_24, column: "UV703b: 20km to less than 30km - 16 to 24", parent: km20_30, group: age, label: "20 km to under 30 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km20_30_a25_34, column: "UV703b: 20km to less than 30km - 25 to 34", parent: km20_30, group: age, label: "20 km to under 30 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km20_30_a35_49, column: "UV703b: 20km to less than 30km - 35 to 49", parent: km20_30, group: age, label: "20 km to under 30 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km20_30_a50_64, column: "UV703b: 20km to less than 30km - 50 to 64", parent: km20_30, group: age, label: "20 km to under 30 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km20_30_a65p, column: "UV703b: 20km to less than 30km - 65 and over", parent: km20_30, group: age, label: "20 km to under 30 km, aged 65 and over", short: "65 and over"}
+  # 30 km to under 40 km
+  - {id: km30_40_a16_24, column: "UV703b: 30km to less than 40km - 16 to 24", parent: km30_40, group: age, label: "30 km to under 40 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km30_40_a25_34, column: "UV703b: 30km to less than 40km - 25 to 34", parent: km30_40, group: age, label: "30 km to under 40 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km30_40_a35_49, column: "UV703b: 30km to less than 40km - 35 to 49", parent: km30_40, group: age, label: "30 km to under 40 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km30_40_a50_64, column: "UV703b: 30km to less than 40km - 50 to 64", parent: km30_40, group: age, label: "30 km to under 40 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km30_40_a65p, column: "UV703b: 30km to less than 40km - 65 and over", parent: km30_40, group: age, label: "30 km to under 40 km, aged 65 and over", short: "65 and over"}
+  # 40 km to under 60 km
+  - {id: km40_60_a16_24, column: "UV703b: 40km to less than 60km - 16 to 24", parent: km40_60, group: age, label: "40 km to under 60 km, aged 16 to 24", short: "16 to 24"}
+  - {id: km40_60_a25_34, column: "UV703b: 40km to less than 60km - 25 to 34", parent: km40_60, group: age, label: "40 km to under 60 km, aged 25 to 34", short: "25 to 34"}
+  - {id: km40_60_a35_49, column: "UV703b: 40km to less than 60km - 35 to 49", parent: km40_60, group: age, label: "40 km to under 60 km, aged 35 to 49", short: "35 to 49"}
+  - {id: km40_60_a50_64, column: "UV703b: 40km to less than 60km - 50 to 64", parent: km40_60, group: age, label: "40 km to under 60 km, aged 50 to 64", short: "50 to 64"}
+  - {id: km40_60_a65p, column: "UV703b: 40km to less than 60km - 65 and over", parent: km40_60, group: age, label: "40 km to under 60 km, aged 65 and over", short: "65 and over"}
+  # 60 km and over
+  - {id: km60p_a16_24, column: "UV703b: 60km and over - 16 to 24", parent: km60p, group: age, label: "60 km and over, aged 16 to 24", short: "16 to 24"}
+  - {id: km60p_a25_34, column: "UV703b: 60km and over - 25 to 34", parent: km60p, group: age, label: "60 km and over, aged 25 to 34", short: "25 to 34"}
+  - {id: km60p_a35_49, column: "UV703b: 60km and over - 35 to 49", parent: km60p, group: age, label: "60 km and over, aged 35 to 49", short: "35 to 49"}
+  - {id: km60p_a50_64, column: "UV703b: 60km and over - 50 to 64", parent: km60p, group: age, label: "60 km and over, aged 50 to 64", short: "50 to 64"}
+  - {id: km60p_a65p, column: "UV703b: 60km and over - 65 and over", parent: km60p, group: age, label: "60 km and over, aged 65 and over", short: "65 and over"}
+  # No fixed place of work or working outside the UK
+  - {id: no_fixed_a16_24, column: "UV703b: Other - No fixed place of work or working outside the UK - 16 to 24", parent: no_fixed, group: age, label: "No fixed place of work or working outside the UK, aged 16 to 24", short: "16 to 24"}
+  - {id: no_fixed_a25_34, column: "UV703b: Other - No fixed place of work or working outside the UK - 25 to 34", parent: no_fixed, group: age, label: "No fixed place of work or working outside the UK, aged 25 to 34", short: "25 to 34"}
+  - {id: no_fixed_a35_49, column: "UV703b: Other - No fixed place of work or working outside the UK - 35 to 49", parent: no_fixed, group: age, label: "No fixed place of work or working outside the UK, aged 35 to 49", short: "35 to 49"}
+  - {id: no_fixed_a50_64, column: "UV703b: Other - No fixed place of work or working outside the UK - 50 to 64", parent: no_fixed, group: age, label: "No fixed place of work or working outside the UK, aged 50 to 64", short: "50 to 64"}
+  - {id: no_fixed_a65p, column: "UV703b: Other - No fixed place of work or working outside the UK - 65 and over", parent: no_fixed, group: age, label: "No fixed place of work or working outside the UK, aged 65 and over", short: "65 and over"}
+means:
+  - {id: mean_distance, label: Average distance to work (estimated), short: Average distance, unit: km, decimals: 1}
+note: "Average distance is estimated from bands: each band counts as its midpoint and '60 km and over' as 75 km. People working mainly from home or with no fixed place of work are left out of the average but shown as categories."

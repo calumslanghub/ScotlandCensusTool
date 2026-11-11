@@ -1,0 +1,19 @@
+# UV415: bedroom occupancy rating. +2 or +1 means spare bedrooms (under-occupied), 0 is the
+# standard, -1 or less means overcrowded.
+id: uv415_occupancy
+status: ready
+table: UV415
+title: Occupancy rating for bedrooms
+scheme: PuBu
+source:
+  file: data/raw/Census/Census2022OutputAreaUV/UV415 - Occupancy rating for bedrooms.csv
+  citation: "Scotland's Census 2022, UV415, Output Areas. Crown copyright, National Records of Scotland, Open Government Licence v3.0"
+universe: {label: "All occupied households", total_column: "All occupied households", unit: households}
+categories:
+  - {id: plus_two, column: "Occupancy rating of bedrooms: +2 or more", label: "+2 or more (2+ spare bedrooms)", short: "+2", value: 2}
+  - {id: plus_one, column: "Occupancy rating of bedrooms: +1", label: "+1 (1 spare bedroom)", short: "+1", value: 1}
+  - {id: zero, column: "Occupancy rating of bedrooms: 0", label: "0 (as many bedrooms as needed)", short: "0", value: 0}
+  - {id: minus_one, column: "Occupancy rating of bedrooms: -1 or less", label: "-1 or less (overcrowded)", short: "-1", value: -1}
+means:
+  - {id: mean_rating, label: Average occupancy rating, short: Occupancy rating, unit: bedrooms, decimals: 2}
+note: "Average rating counts '+2 or more' as +2 and '-1 or less' as -1, so it understates both extremes. Positive = spare bedrooms, negative = overcrowded."
