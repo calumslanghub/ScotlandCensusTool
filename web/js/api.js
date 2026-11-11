@@ -13,10 +13,45 @@ const MANIFEST = "manifest.json";
 const cache = new Map();
 const loaded = new Map();  // url -> parsed data, once a download has finished
 
+const MAX_CONCURRENT = 6;
+const RETRY_STATUS = new Set([429, 502, 503, 504]);
+let active = 0;
+const waiting = [];
+
+function acquire() {
+  return new Promise((resolve) => {
+    if (active < MAX_CONCURRENT) { active++; resolve(); }
+    else waiting.push(resolve);
+  });
+}
+
+function release() {
+  const next = waiting.shift();
+  if (next) next();      // hand the slot straight to the next request
+  else active--;
+}
+
+async function fetchWithRetry(url, tries = 4) {
+  for (let i = 0; i < tries; i++) {
+    const res = await fetch(url);
+    if (res.ok) return res;
+    if (!RETRY_STATUS.has(res.status) || i === tries - 1) {
+      throw new Error(`${url}: HTTP ${res.status}`);
+    }
+    // 400ms, 800ms, 1600ms (+ jitter) before trying again
+    await new Promise((r) => setTimeout(r, 400 * 2 ** i + Math.random() * 200));
+  }
+}
+
 async function download(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
+  let bytes;
+  await acquire();
+  try {
+    const res = await fetchWithRetry(url);
+    bytes = new Uint8Array(await res.arrayBuffer());
+  } finally {
+    release();
+  }
   const gzipped = bytes[0] === 0x1f && bytes[1] === 0x8b;
   const text = gzipped
     ? await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text()
